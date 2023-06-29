@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Simple TODO App</title>
+  </head>
+
+  <body class="bg-light">
+    <!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark" > -->
+    <nav class="navbar navbar-expand-lg" style="background-color: #0067a3">
+      <!-- <div class="container-fluid">
+        <a class="navbar-brand" href="#">SimpleTODO</a>
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarSupportedContent"
+          aria-controls="navbarSupportedContent"
+          aria-expanded="false"
+          aria-label="Toggle navigation"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+            <li class="nav-item">
+              <a class="nav-link active" aria-current="page" href="#">Home</a>
+            </li>
+          </ul>
+          <form id="app-login-form" class="d-flex">
+            <input
+              class="form-control me-2"
+              name="login"
+              autocomplete="username"
+              type="text"
+              placeholder="Login"
+              aria-label="Login"
+            />
+            <input
+              class="form-control me-2"
+              name="password"
+              autocomplete="current-password"
+              type="password"
+              placeholder="Password"
+              aria-label="Password"
+            />
+            <button
+              id="app-login-btn"
+              class="btn btn-outline-info"
+              type="submit"
+            >
+              Sign In
+            </button>
+          </form>
+        </div>
+      </div> -->
+    </nav>
+
+    <main>
+      <!-- Модальное окно добавления задачи -->
+      <div
+        class="modal fade"
+        id="staticBackdrop"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="staticBackdropLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title mx-auto" id="staticBackdropLabel">
+                Input task name
+              </h5>
+            </div>
+
+            <div class="modal-body">
+              <h6>
+                <div class="div-inp">Input task name</div>
+              </h6>
+              <input type="text" value="task1" class="input input-task" />
+              <!-- <h6>
+                <div
+                  class="div-inp input-user-label--invisible"
+                  id="input-user-label"
+                >
+                  Input user
+                </div>
+              </h6> -->
+              <!-- <input
+                type="text"
+                value="test"
+                class="input input-user--invisible"
+                id="input-user"
+              /> -->
+
+              <!-- Всплывающий список на замену input id="input-user" -->
+              <div
+                class="div-inp input-user-form--invisible"
+                id="input-user-form"
+              >
+                <h6>
+                  <div class="div-inp input-user-label">Input user</div>
+                </h6>
+                <select class="div-inp input-user" name="user" id="input-user">
+                  <option value="test">test</option>
+                  <option value="розово-красный">розово-красный</option>
+                  <option value="светло-коричневый">светло-коричневый</option>
+                  <option value="жёлтый">жёлтый</option>
+                  <option value="зелёный">зелёный</option>
+                  <option value="голубой">голубой</option>
+                  <option value="синий">синий</option>
+                  <option value="фиолетовый">фиолетовый</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary button-close"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button type="button" class="btn btn-primary button-input">
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Модальное окно добавления нового пользователя -->
+      <div
+        class="modal fade"
+        id="staticBackdropAddUser"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="staticBackdropAddUserLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title mx-auto" id="staticBackdropAddUserLabel">
+                Input login and password of new user
+              </h5>
+            </div>
+
+            <div class="modal-body">
+              <h6>
+                <div class="div-inp">Input user login</div>
+              </h6>
+              <input type="text" value="login" class="input input-login" />
+              <h6>
+                <div class="div-inp">Input user password</div>
+              </h6>
+              <input
+                type="text"
+                value="password"
+                class="input input-password-1"
+              />
+              <h6>
+                <div class="div-inp">Confirm user password</div>
+              </h6>
+              <input
+                type="text"
+                value="password"
+                class="input input-password-2"
+              />
+            </div>
+
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary button-close"
+                data-bs-dismiss="modal"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                class="btn btn-primary button-input-adduser"
+              >
+                Apply
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Модальное окно alert-->
+      <div
+        class="modal fade"
+        id="alert"
+        data-bs-backdrop="static"
+        data-bs-keyboard="false"
+        tabindex="-1"
+        aria-labelledby="alertLabel"
+        aria-hidden="true"
+      >
+        <div class="modal-dialog modal-dialog-centered">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title mx-auto" id="alertLabel">Attention</h5>
+            </div>
+            <div class="modal-body d-flex">
+              <h6 class="mx-auto my-auto">
+                <span id="alert-message">Message</span>
+              </h6>
+            </div>
+            <div class="modal-footer">
+              <button
+                type="button"
+                class="btn btn-secondary button-close"
+                data-bs-dismiss="modal"
+              >
+                Закрыть
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="container">
+        <div id="content">
+          <h2>Please Sign In to see your tasks!</h2>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>

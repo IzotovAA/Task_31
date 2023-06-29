@@ -1,0 +1,54 @@
+.btn {
+  margin: 0px 10px 0px 10px;
+}
+
+#app-login-btn {
+  width: 160px;
+}
+
+.container {
+  display: flex;
+}
+
+.column {
+  width: 20vw;
+
+  border: 1px solid black;
+  padding: 5px;
+  margin: 5px;
+}
+
+.task-column {
+  min-height: 300px;
+  width: auto;
+}
+
+.avatar {
+  display: flex;
+}
+
+.avatar__icon {
+  width: 40px;
+  height: 40px;
+  margin: 0px 10px 0px 10px;
+  border: 3px solid white;
+  border-radius: 20px;
+}
+
+.app-btn--invisible {
+  display: none;
+}
+
+.input-user-form--invisible {
+  display: none;
+}
+
+.app-navbar-brand {
+  font-family: Roboto;
+  font-size: 28px;
+  font-weight: 400;
+  /* line-height: 33px; */
+  /* letter-spacing: 0em; */
+  /* text-align: left; */
+  color: white;
+}
