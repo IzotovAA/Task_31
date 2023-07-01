@@ -21,6 +21,8 @@ import { isTheLoginFree } from "./utils";
 import { addUser } from "./utils";
 import { displayTasks } from "./utils";
 import { updUserList } from "./utils";
+import { removeEvLisOnTask } from "./utils";
+import { addEvLisOnTask } from "./utils";
 
 export const appState = new State();
 export const inputUser = document.querySelector("#input-user");
@@ -56,7 +58,8 @@ const content = document.querySelector("#content");
 // const inputTaskLabel = document.querySelector("#staticBackdropLabel");
 const inputTask = document.querySelector(".input-task");
 
-const inputUserLabel = document.querySelector("#input-user-form");
+const inputUserForm = document.querySelector("#input-user-form");
+// const inputTaskEdit = document.querySelector("#input-task-edit");
 
 const inputLogin = document.querySelector(".input-login");
 const inputPass1 = document.querySelector(".input-password-1");
@@ -84,7 +87,11 @@ function startApp() {
     const login = formData.get("login");
     const password = formData.get("password");
 
-    if (!login || !password) return;
+    if (!login || !password) {
+      modalAlert.show();
+      alertMessage.innerHTML = "Input login and password";
+      return;
+    }
 
     let auth = authUser(login, password);
 
@@ -106,9 +113,10 @@ function startApp() {
     }
 
     const greetings = document.querySelector("#greetings");
+    const username = document.querySelector("#username");
     // console.log(appState.currentUser.login);
-    greetings.innerHTML = `Hello ${appState.currentUser.login}`;
-
+    greetings.innerHTML = `Hello ${appState.currentUser.login}!`;
+    username.innerHTML = appState.currentUser.login;
     // clearTaskList();
 
     // console.log("localStorage после авторизации", localStorage);
@@ -116,35 +124,70 @@ function startApp() {
     const addUserBtn = document.querySelector("#app-adduser-btn");
     const logoutBtn = document.querySelector("#app-logout-btn");
     const addTaskBtn = document.querySelector("#app-addtask-btn");
-    const taskField1 = document.querySelector(".backlog");
+    const backlog = document.querySelector(".backlog");
+    // const tasks = document.querySelectorAll(".task__item");
 
     // кнопка для отладки
-    const localBtn = document.querySelector("#app-addtask-btn-loc");
+    // const localBtn = document.querySelector("#app-addtask-btn-loc");
+
+    // console.log("проверка админ ли пользователь");
 
     if (isCurrentUserAdmin()) {
       addUserBtn.className = "btn btn-outline-info";
       document.querySelector("h1").innerHTML = "Users tasks here";
+      // inputTaskEdit.classList.toggle("invisible");
+
+      // if (tasks.length) {
+      //   for (const task of tasks) {
+      //     task.addEventListener("click", handlerTaskEdit);
+      //   }
+      // }
+      console.log("админ, если tasks.length, вышается прослушка");
+      // if (tasks.length) {
+      //   removeEvLisOnTask(tasks, handlerTaskEdit);
+      //   addEvLisOnTask(tasks, handlerTaskEdit);
+      // }
+      // displayTasks(backlog, appState.currentUser.login, handlerTaskEdit);
     } else addUserBtn.className = "btn btn-outline-info app-btn--invisible";
 
-    displayTasks(taskField1, appState.currentUser.login);
+    displayTasks(backlog, appState.currentUser.login, handlerTaskEdit);
 
     // заменил на функцию
     // if (localStorage.getItem("tasks")) {
     //         const tasks = getFromStorage("tasks");
     //   for (const task of tasks) {
-    //     taskField1.insertAdjacentHTML(
+    //     backlog.insertAdjacentHTML(
     //       "beforeend",
     //       `<li class='task__item'>${task.name}</li>`
     //     );
     //   }
     // }
 
+    // console.log("далее должны навесится прослушиватели");
     addUserBtn.addEventListener("click", handlerAddUser);
     taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn);
     logoutBtn.addEventListener("click", handlerLogout);
     addTaskBtn.addEventListener("click", handlerAddTask);
     taskInputOkBtn.addEventListener("click", handlerTaskOkBtn);
-    localBtn.addEventListener("click", handlerLoc);
+    // localBtn.addEventListener("click", handlerLoc);
+
+    function handlerTaskEdit() {
+      const login = appState.currentUser.login;
+      inputUserForm.className = "div-inp input-user-form--invisible";
+      console.log("handlerTaskEdit", "this", this);
+      inputTask.value = this.innerHTML;
+      if (login == "admin") {
+        // inputUserForm.className = "div-inp input-user-form";
+        // inputUser.className = "div-inp input-user";
+        // updUserList();
+        // inputTaskEdit.classList.toggle("invisible");
+      } else {
+        // inputUserForm.className = "div-inp input-user-form--invisible";
+        // inputUser.className = "div-inp input-user--invisible";
+      }
+      modalWindow.show();
+      // console.log("handlerTaskEdit btn");
+    }
 
     function handlerAddUser() {
       modalWindowAddUser.show();
@@ -160,11 +203,13 @@ function startApp() {
         alertMessage.innerHTML = "All fields are required";
         return;
       }
+
       if (inputLogin.value.match(/admin/gi)) {
         modalAlert.show();
         alertMessage.innerHTML = "This name cannot be used";
         return;
       } else if (isTheLoginFree(login)) {
+        console.log("isTheLoginFree", isTheLoginFree(login));
         if (pass1 == pass2) {
           addUser(User, login, pass1);
         } else {
@@ -188,6 +233,8 @@ function startApp() {
       // addTaskBtn.removeEventListener("click", handlerAddTask);
       taskInputOkBtn.removeEventListener("click", handlerTaskOkBtn);
       // localBtn.removeEventListener("click", handlerLoc);
+      taskInputAddUserBtn.removeEventListener("click", handlerAddUserOkBtn);
+      // inputTaskEdit.classList.toggle("invisible");
       console.log("localStorage", localStorage);
       console.log("appState.currentUser", appState.currentUser);
       return startApp();
@@ -196,13 +243,16 @@ function startApp() {
     function handlerAddTask() {
       const login = appState.currentUser.login;
       if (login == "admin") {
-        inputUserLabel.className = "div-inp input-user-form";
+        inputUserForm.className = "div-inp input-user-form";
         // inputUser.className = "div-inp input-user";
         updUserList();
       } else {
-        inputUserLabel.className = "div-inp input-user-form--invisible";
+        inputUserForm.className = "div-inp input-user-form--invisible";
         // inputUser.className = "div-inp input-user--invisible";
       }
+
+      // console.log("кнопка добавление задачи");
+
       modalWindow.show();
     }
 
@@ -215,7 +265,7 @@ function startApp() {
         const task = new Task(inputTask.value, inputUser.value);
         Task.save(task);
 
-        taskField1.insertAdjacentHTML(
+        backlog.insertAdjacentHTML(
           "beforeend",
           `<li class='task__item'>${task.own}: ${task.name}</li>`
         );
@@ -225,12 +275,16 @@ function startApp() {
         const task = new Task(inputTask.value, login);
         Task.save(task);
 
-        taskField1.insertAdjacentHTML(
+        backlog.insertAdjacentHTML(
           "beforeend",
           `<li class='task__item'>${task.name}</li>`
         );
         modalWindow.hide();
       }
+      // console.log("handlerTaskOkBtn");
+      // removeEvLisOnTask(tasks, handlerTaskEdit);
+      // addEvLisOnTask(tasks, handlerTaskEdit);
+      displayTasks(backlog, appState.currentUser.login, handlerTaskEdit);
     }
 
     function handlerLoc() {

@@ -1,3 +1,9 @@
+.body {
+  margin: 0;
+  padding: 0;
+  font-family: Roboto, Arial, Helvetica, sans-serif;
+}
+
 .btn {
   margin: 0px 10px 0px 10px;
 }
@@ -12,15 +18,29 @@
 
 .column {
   width: 20vw;
-
+  height: fit-content;
+  max-height: 80vh;
   border: 1px solid black;
-  padding: 5px;
+  border-radius: 10px;
+  padding: 12px;
   margin: 5px;
+  background-color: #ebecf0;
+  overflow: auto;
 }
 
 .task-column {
-  min-height: 300px;
+  min-height: 200px;
   width: auto;
+  list-style-type: none;
+  padding: 0;
+}
+
+.task__item {
+  background-color: #ffffff;
+  margin: 2%;
+  border-radius: 5px;
+  word-break: break-all;
+  cursor: pointer;
 }
 
 .avatar {
@@ -35,20 +55,39 @@
   border-radius: 20px;
 }
 
-.app-btn--invisible {
-  display: none;
-}
-
+.app-btn--invisible,
 .input-user-form--invisible {
   display: none;
 }
 
+.invisible {
+  display: none;
+}
+
+/* .input-user-form--invisible {
+  display: none;
+} */
+
 .app-navbar-brand {
-  font-family: Roboto;
+  /* font-family: Roboto, Arial, Helvetica, sans-serif; */
   font-size: 28px;
   font-weight: 400;
   /* line-height: 33px; */
   /* letter-spacing: 0em; */
   /* text-align: left; */
   color: white;
+  /* justify-content: center; */
+  padding: 0;
 }
+
+.app-navbar-greetings {
+  /* font-family: Roboto, Arial, Helvetica, sans-serif; */
+  font-size: 20px;
+  font-weight: 400;
+  color: white;
+  /* justify-content: center; */
+  padding: 0;
+}
+
+/* #greetings {
+} */

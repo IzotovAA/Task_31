@@ -1,7 +1,6 @@
 "use strict";
 
 import { appState } from "./app";
-// import inputUser from "./app";
 
 export const getFromStorage = function (key) {
   return JSON.parse(localStorage.getItem(key) || "[]");
@@ -42,7 +41,16 @@ export const isTheLoginFree = function (login) {
   return true;
 };
 
-export const displayTasks = function (taskField, login) {
+export const displayTasks = function (taskField, login, handlerTask) {
+  let taskList = document.querySelectorAll(".task__item");
+  // const taskListContainer = document.querySelector("#input-user");
+  console.log("taskList", taskList);
+  if (taskList.length) {
+    taskList.forEach((element) => {
+      taskField.removeChild(element);
+    });
+  }
+
   if (localStorage.getItem("tasks")) {
     const tasks = getFromStorage("tasks");
     for (const task of tasks) {
@@ -60,6 +68,10 @@ export const displayTasks = function (taskField, login) {
         }
       }
     }
+
+    taskList = document.querySelectorAll(".task__item");
+    // removeEvLisOnTask(tasks, handlerTask);
+    addEvLisOnTask(taskList, handlerTask);
   }
 };
 
@@ -82,6 +94,22 @@ export const updUserList = function () {
       );
       // очистить инпут с выбором
       // отобразить в инпут всех существующих пользователей
+    }
+  }
+};
+
+// export const removeEvLisOnTask = function (tasks, handlerTask) {
+//   if (tasks.length) {
+//     for (const task of tasks) {
+//       task.removeEventListener("click", handlerTask);
+//     }
+//   }
+// };
+
+export const addEvLisOnTask = function (tasks, handlerTask) {
+  if (tasks.length) {
+    for (const task of tasks) {
+      task.addEventListener("click", handlerTask);
     }
   }
 };
