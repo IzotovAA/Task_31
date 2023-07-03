@@ -41,29 +41,100 @@ export const isTheLoginFree = function (login) {
   return true;
 };
 
+// задумка: в общем ul списке идут списки ul c логинами и в кажом таком списке перечень li с задачами для пользователя
 export const displayTasks = function (taskField, login, handlerTask) {
+  let userOfTaskList = document.querySelectorAll(".app-task__user");
+
+  // backlog (taskField)
+  // app-task__user (userOfTaskList)
+  // task__item (taskList)
+
+  if (login == "admin") {
+    if (userOfTaskList.length) {
+      // taskList = document.querySelectorAll(".task__item");
+      userOfTaskList.forEach((element) => {
+        taskField.removeChild(element);
+      });
+    }
+  }
+
   let taskList = document.querySelectorAll(".task__item");
-  // const taskListContainer = document.querySelector("#input-user");
-  console.log("taskList", taskList);
+
   if (taskList.length) {
     taskList.forEach((element) => {
       taskField.removeChild(element);
     });
   }
 
+  // const taskListContainer = document.querySelector("#input-user");
+  // console.log("taskList", taskList);
+  // if (taskList.length) {
+  //   taskList.forEach((element) => {
+  //     taskField.removeChild(element);
+  //   });
+  // }
+
   if (localStorage.getItem("tasks")) {
     const tasks = getFromStorage("tasks");
+    const tasksByUser = new Map();
     for (const task of tasks) {
-      if (login == "admin") {
+      // console.log("task.own", task.own);
+      // console.log("проверка map has test", tasksByUser.has(task.own));
+      if (!tasksByUser.has(task.own)) {
+        tasksByUser.set(task.own, [task]);
+        // console.log("должно push task", task);
+      } else {
+        const tempUserArr = tasksByUser.get(task.own);
+        // console.log("tempUserArr", tempUserArr);
+        tempUserArr.push(task);
+        // console.log("tempUserArr после push", tempUserArr);
+        tasksByUser.set(task.own, tempUserArr);
+      }
+
+      // console.log("вывести map get test", tasksByUser.get(task.own));
+      // console.log("вывести map", tasksByUser);
+    }
+
+    if (login == "admin") {
+      let i = 0;
+      // taskField.insertAdjacentHTML(
+      //   "beforeend",
+      //   `<li class='task__item'>${task.own}: ${task.name}</li>`
+      // );
+      // backlog (taskField)
+      // app-task__user (userOfTaskList)
+      // task__item (taskList)
+      for (const key of tasksByUser.keys()) {
+        // console.log("key", key);
         taskField.insertAdjacentHTML(
           "beforeend",
-          `<li class='task__item'>${task.own}: ${task.name}</li>`
+          `<ul class="app-task__user">${key}:</ul>`
         );
-      } else {
+        userOfTaskList = document.querySelectorAll(".app-task__user");
+
+        tasksByUser.get(key).forEach((elem) => {
+          userOfTaskList[i].insertAdjacentHTML(
+            "beforeend",
+            `<li class="task__item" id='${elem.id}'>${elem.name}</li>`
+          );
+        });
+        i++;
+      }
+
+      // taskField.insertAdjacentHTML(
+      //   "beforeend",
+      //   `<ul class="app-task__user">
+      //     ${task.own}:
+      //     <li class="task__item">${task.name}</li>
+      //   </ul>`
+      // );
+    } else {
+      // console.log("если не админ");
+      for (const task of tasks) {
         if (task.own == login) {
           taskField.insertAdjacentHTML(
             "beforeend",
-            `<li class='task__item'>${task.name}</li>`
+            `<li class='task__item' id='${task.id}'>${task.name}</li>`
           );
         }
       }
@@ -112,4 +183,39 @@ export const addEvLisOnTask = function (tasks, handlerTask) {
       task.addEventListener("click", handlerTask);
     }
   }
+};
+
+export const deleteFromStorage = function (key, id) {
+  const storageData = getFromStorage(key);
+  const tempArr = [];
+
+  storageData.forEach((element) => {
+    if (element.id != id) {
+      tempArr.push(element);
+    }
+  });
+
+  localStorage.setItem(key, JSON.stringify(tempArr));
+};
+
+export const editInStorage = function (key, id, changeItem, newInfo) {
+  const storageData = getFromStorage(key);
+  const tempArr = [];
+
+  storageData.forEach((element) => {
+    if (element.id != id) {
+      tempArr.push(element);
+      deleteFromStorage(key, element.id);
+    } else {
+      element[changeItem] = newInfo;
+      tempArr.push(element);
+      deleteFromStorage(key, id);
+    }
+  });
+
+  localStorage.setItem(key, JSON.stringify(tempArr));
+};
+
+export const moveToNextStage = function (taskId) {
+  const storageData = getFromStorage("tasks");
 };

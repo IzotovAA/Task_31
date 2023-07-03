@@ -16,6 +16,9 @@ import { generateAdmin } from "./utils";
 import { State } from "./state";
 import { authUser } from "./services/auth";
 import { getFromStorage } from "./utils";
+import { addToStorage } from "./utils";
+import { deleteFromStorage } from "./utils";
+import { editInStorage } from "./utils";
 import { isCurrentUserAdmin } from "./utils";
 import { isTheLoginFree } from "./utils";
 import { addUser } from "./utils";
@@ -35,6 +38,8 @@ const modalWindow = new Modal(document.querySelector("#staticBackdrop"));
 
 // кнопка Ок в модальном окне задачи
 const taskInputOkBtn = document.querySelector(".button-input");
+const taskEditOkBtn = document.querySelector(".button-input-taskedit");
+const deleteTaskBtn = document.querySelector(".button-task-delete");
 
 // кнопка Закрыть в модальном окне диапазона
 // const buttonClose = document.querySelector(".button-close");
@@ -71,6 +76,12 @@ generateTestUser(User);
 generateAdmin(Admin);
 
 document.addEventListener("DOMContentLoaded", startApp);
+taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn);
+// taskInputOkBtn.addEventListener("click", handlerTaskOkBtn);
+// taskEditOkBtn.addEventListener("click", handlerTaskEditOkBtn);
+// deleteTaskBtn.addEventListener("click", handlerDeleteTaskBtn);
+
+let taskId = "";
 
 function startApp() {
   navbar.innerHTML = navbarNotAuthTemplate;
@@ -114,17 +125,27 @@ function startApp() {
 
     const greetings = document.querySelector("#greetings");
     const username = document.querySelector("#username");
+
+    const currentUser = appState.currentUser.login;
     // console.log(appState.currentUser.login);
-    greetings.innerHTML = `Hello ${appState.currentUser.login}!`;
-    username.innerHTML = appState.currentUser.login;
+    greetings.innerHTML = `Hello ${currentUser}!`;
+    username.innerHTML = currentUser;
     // clearTaskList();
 
     // console.log("localStorage после авторизации", localStorage);
 
-    const addUserBtn = document.querySelector("#app-adduser-btn");
     const logoutBtn = document.querySelector("#app-logout-btn");
-    const addTaskBtn = document.querySelector("#app-addtask-btn");
+    const addUserBtn = document.querySelector("#app-adduser-btn");
+    const backlogAddTaskBtn = document.querySelector("#backlog-addtask-btn");
+    const readyAddTaskBtn = document.querySelector("#ready-addtask-btn");
+    const inProgAddTaskBtn = document.querySelector("#inprogress-addtask-btn");
+    const finishedAddTaskBtn = document.querySelector("#finished-addtask-btn");
+
     const backlog = document.querySelector(".backlog");
+    const ready = document.querySelector(".ready");
+    const inprogress = document.querySelector(".inprogress");
+    const finished = document.querySelector(".finished");
+
     // const tasks = document.querySelectorAll(".task__item");
 
     // кнопка для отладки
@@ -150,7 +171,7 @@ function startApp() {
       // displayTasks(backlog, appState.currentUser.login, handlerTaskEdit);
     } else addUserBtn.className = "btn btn-outline-info app-btn--invisible";
 
-    displayTasks(backlog, appState.currentUser.login, handlerTaskEdit);
+    displayTasks(backlog, currentUser, handlerTaskEdit);
 
     // заменил на функцию
     // if (localStorage.getItem("tasks")) {
@@ -165,64 +186,63 @@ function startApp() {
 
     // console.log("далее должны навесится прослушиватели");
     addUserBtn.addEventListener("click", handlerAddUser);
-    taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn);
+    // taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn);
     logoutBtn.addEventListener("click", handlerLogout);
-    addTaskBtn.addEventListener("click", handlerAddTask);
+    backlogAddTaskBtn.addEventListener("click", handlerAddTask);
     taskInputOkBtn.addEventListener("click", handlerTaskOkBtn);
+    taskEditOkBtn.addEventListener("click", handlerTaskEditOkBtn);
+    deleteTaskBtn.addEventListener("click", handlerDeleteTaskBtn);
     // localBtn.addEventListener("click", handlerLoc);
 
-    function handlerTaskEdit() {
-      const login = appState.currentUser.login;
+    function handlerTaskEdit(e) {
+      // const login = appState.currentUser.login;
       inputUserForm.className = "div-inp input-user-form--invisible";
       console.log("handlerTaskEdit", "this", this);
       inputTask.value = this.innerHTML;
-      if (login == "admin") {
-        // inputUserForm.className = "div-inp input-user-form";
-        // inputUser.className = "div-inp input-user";
-        // updUserList();
-        // inputTaskEdit.classList.toggle("invisible");
-      } else {
-        // inputUserForm.className = "div-inp input-user-form--invisible";
-        // inputUser.className = "div-inp input-user--invisible";
-      }
+
+      //Apply
+      taskEditOkBtn.className = "btn btn-primary button-input-taskedit";
+
+      //add
+      taskInputOkBtn.className = "btn btn-primary button-input--invisible";
+
+      taskId = e.target.id;
+      if (currentUser == "admin")
+        deleteTaskBtn.className = "btn btn-primary button-task-delete";
+      // console.log("this", this);
       modalWindow.show();
-      // console.log("handlerTaskEdit btn");
+    }
+
+    //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    function handlerTaskEditOkBtn() {
+      // const tasks = getFromStorage("tasks");
+
+      editInStorage("tasks", taskId, "name", inputTask.value);
+
+      modalWindow.hide();
+      deleteTaskBtn.className = "btn btn-primary button-task-delete invisible";
+      taskEditOkBtn.className =
+        "btn btn-primary button-input-taskedit invisible";
+      taskInputOkBtn.className = "btn btn-primary button-input";
+
+      displayTasks(backlog, currentUser, handlerTaskEdit);
+    }
+
+    function handlerDeleteTaskBtn() {
+      deleteFromStorage("tasks", taskId);
+      displayTasks(backlog, currentUser, handlerTaskEdit);
+      modalWindow.hide();
+      // deleteTaskBtn.classList.toggle("invisible");
+      // taskEditOkBtn.classList.toggle("invisible");
+      // taskInputOkBtn.classList.toggle("invisible");
+      deleteTaskBtn.className = "btn btn-primary button-task-delete invisible";
+      taskEditOkBtn.className =
+        "btn btn-primary button-input-taskedit invisible";
+      taskInputOkBtn.className = "btn btn-primary button-input";
     }
 
     function handlerAddUser() {
       modalWindowAddUser.show();
-    }
-
-    function handlerAddUserOkBtn() {
-      const login = inputLogin.value,
-        pass1 = inputPass1.value,
-        pass2 = inputPass2.value;
-
-      if (!login || !pass1 || !pass2) {
-        modalAlert.show();
-        alertMessage.innerHTML = "All fields are required";
-        return;
-      }
-
-      if (inputLogin.value.match(/admin/gi)) {
-        modalAlert.show();
-        alertMessage.innerHTML = "This name cannot be used";
-        return;
-      } else if (isTheLoginFree(login)) {
-        console.log("isTheLoginFree", isTheLoginFree(login));
-        if (pass1 == pass2) {
-          addUser(User, login, pass1);
-        } else {
-          modalAlert.show();
-          alertMessage.innerHTML = "Password not confirmed";
-          return;
-        }
-      } else {
-        modalAlert.show();
-        alertMessage.innerHTML = "That login already exists";
-        return;
-      }
-      modalWindowAddUser.hide();
     }
 
     function handlerLogout() {
@@ -230,19 +250,23 @@ function startApp() {
       appState.currentUser = null;
       // window.location.href = "/";
       // logoutBtn.removeEventListener("click", handlerLogout);
-      // addTaskBtn.removeEventListener("click", handlerAddTask);
+      // backlogAddTaskBtn.removeEventListener("click", handlerAddTask);
       taskInputOkBtn.removeEventListener("click", handlerTaskOkBtn);
       // localBtn.removeEventListener("click", handlerLoc);
-      taskInputAddUserBtn.removeEventListener("click", handlerAddUserOkBtn);
+      // taskInputAddUserBtn.removeEventListener("click", handlerAddUserOkBtn);
+      taskEditOkBtn.removeEventListener("click", handlerTaskEditOkBtn);
+      deleteTaskBtn.removeEventListener("click", handlerDeleteTaskBtn);
       // inputTaskEdit.classList.toggle("invisible");
+      taskId = "";
       console.log("localStorage", localStorage);
       console.log("appState.currentUser", appState.currentUser);
+      console.log("localStorage", localStorage.tasks);
       return startApp();
     }
 
     function handlerAddTask() {
-      const login = appState.currentUser.login;
-      if (login == "admin") {
+      // const login = appState.currentUser.login;
+      if (currentUser == "admin") {
         inputUserForm.className = "div-inp input-user-form";
         // inputUser.className = "div-inp input-user";
         updUserList();
@@ -258,33 +282,32 @@ function startApp() {
 
     function handlerTaskOkBtn() {
       if (!inputTask.value) return;
-      const login = appState.currentUser.login;
+      // const login = appState.currentUser.login;
 
       // debugger;
-      if (login == "admin") {
+      if (currentUser == "admin") {
         const task = new Task(inputTask.value, inputUser.value);
         Task.save(task);
 
-        backlog.insertAdjacentHTML(
-          "beforeend",
-          `<li class='task__item'>${task.own}: ${task.name}</li>`
-        );
-
-        modalWindow.hide();
+        // backlog.insertAdjacentHTML(
+        //   "beforeend",
+        //   `<li class='task__item'>${task.own}: ${task.name}</li>`
+        // );
       } else {
         const task = new Task(inputTask.value, login);
         Task.save(task);
 
-        backlog.insertAdjacentHTML(
-          "beforeend",
-          `<li class='task__item'>${task.name}</li>`
-        );
-        modalWindow.hide();
+        // backlog.insertAdjacentHTML(
+        //   "beforeend",
+        //   `<li class='task__item'>${task.name}</li>`
+        // );
+        // modalWindow.hide();
       }
       // console.log("handlerTaskOkBtn");
       // removeEvLisOnTask(tasks, handlerTaskEdit);
       // addEvLisOnTask(tasks, handlerTaskEdit);
-      displayTasks(backlog, appState.currentUser.login, handlerTaskEdit);
+      modalWindow.hide();
+      displayTasks(backlog, login, handlerTaskEdit);
     }
 
     function handlerLoc() {
@@ -308,4 +331,36 @@ function startApp() {
     //   console.log("taskList.length после", taskList.length);
     // }
   }
+}
+
+function handlerAddUserOkBtn() {
+  const login = inputLogin.value,
+    pass1 = inputPass1.value,
+    pass2 = inputPass2.value;
+
+  if (!login || !pass1 || !pass2) {
+    modalAlert.show();
+    alertMessage.innerHTML = "All fields are required";
+    return;
+  }
+
+  if (login.match(/admin/gi)) {
+    modalAlert.show();
+    alertMessage.innerHTML = "This name cannot be used";
+    return;
+  } else if (isTheLoginFree(login)) {
+    console.log("isTheLoginFree", isTheLoginFree(login));
+    if (pass1 == pass2) {
+      addUser(User, login, pass1);
+    } else {
+      modalAlert.show();
+      alertMessage.innerHTML = "Password not confirmed";
+      return;
+    }
+  } else {
+    modalAlert.show();
+    alertMessage.innerHTML = "That login already exists";
+    return;
+  }
+  modalWindowAddUser.hide();
 }

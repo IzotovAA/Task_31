@@ -4,6 +4,19 @@
   font-family: Roboto, Arial, Helvetica, sans-serif;
 }
 
+ul {
+  padding: 5px;
+}
+
+li {
+  list-style-type: none;
+}
+
+h4 {
+  margin: 0 auto;
+  text-align: center;
+}
+
 .btn {
   margin: 0px 10px 0px 10px;
 }
@@ -16,7 +29,7 @@
   display: flex;
 }
 
-.column {
+.app-column {
   width: 20vw;
   height: fit-content;
   max-height: 80vh;
@@ -28,11 +41,16 @@
   overflow: auto;
 }
 
-.task-column {
+.app-task-column {
   min-height: 200px;
   width: auto;
-  list-style-type: none;
-  padding: 0;
+  margin: 5px auto;
+}
+
+.app-task__user {
+  border: 1px solid gray;
+  border-radius: 5px;
+  margin: 5px;
 }
 
 .task__item {
@@ -56,7 +74,9 @@
 }
 
 .app-btn--invisible,
-.input-user-form--invisible {
+.input-user-form--invisible,
+.button-input--invisible,
+.button-task-delete--invisible {
   display: none;
 }
 
