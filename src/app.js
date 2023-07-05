@@ -134,6 +134,7 @@ function startApp() {
 
     // console.log("localStorage после авторизации", localStorage);
 
+    // назначение DOM элементов после авторизации и отображения соответствующей информации
     const logoutBtn = document.querySelector("#app-logout-btn");
     const addUserBtn = document.querySelector("#app-adduser-btn");
     const backlogAddTaskBtn = document.querySelector("#backlog-addtask-btn");
@@ -146,7 +147,11 @@ function startApp() {
     const inprogress = document.querySelector(".inprogress");
     const finished = document.querySelector(".finished");
 
-    // const tasks = document.querySelectorAll(".task__item");
+    const tasksColumns = [backlog, ready, inprogress, finished];
+
+    // console.log("backlog", backlog);
+
+    // const tasks = document.querySelectorAll(".app-task__item");
 
     // кнопка для отладки
     // const localBtn = document.querySelector("#app-addtask-btn-loc");
@@ -163,7 +168,7 @@ function startApp() {
       //     task.addEventListener("click", handlerTaskEdit);
       //   }
       // }
-      console.log("админ, если tasks.length, вышается прослушка");
+      // console.log("админ, если tasks.length, вышается прослушка");
       // if (tasks.length) {
       //   removeEvLisOnTask(tasks, handlerTaskEdit);
       //   addEvLisOnTask(tasks, handlerTaskEdit);
@@ -171,7 +176,7 @@ function startApp() {
       // displayTasks(backlog, appState.currentUser.login, handlerTaskEdit);
     } else addUserBtn.className = "btn btn-outline-info app-btn--invisible";
 
-    displayTasks(backlog, currentUser, handlerTaskEdit);
+    displayTasks(tasksColumns, currentUser, handlerTaskEdit);
 
     // заменил на функцию
     // if (localStorage.getItem("tasks")) {
@@ -179,7 +184,7 @@ function startApp() {
     //   for (const task of tasks) {
     //     backlog.insertAdjacentHTML(
     //       "beforeend",
-    //       `<li class='task__item'>${task.name}</li>`
+    //       `<li class='app-task__item'>${task.name}</li>`
     //     );
     //   }
     // }
@@ -189,6 +194,8 @@ function startApp() {
     // taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn);
     logoutBtn.addEventListener("click", handlerLogout);
     backlogAddTaskBtn.addEventListener("click", handlerAddTask);
+    readyAddTaskBtn.addEventListener("click", handlerMoveTask);
+
     taskInputOkBtn.addEventListener("click", handlerTaskOkBtn);
     taskEditOkBtn.addEventListener("click", handlerTaskEditOkBtn);
     deleteTaskBtn.addEventListener("click", handlerDeleteTaskBtn);
@@ -225,12 +232,12 @@ function startApp() {
         "btn btn-primary button-input-taskedit invisible";
       taskInputOkBtn.className = "btn btn-primary button-input";
 
-      displayTasks(backlog, currentUser, handlerTaskEdit);
+      displayTasks(tasksColumns, currentUser, handlerTaskEdit);
     }
 
     function handlerDeleteTaskBtn() {
       deleteFromStorage("tasks", taskId);
-      displayTasks(backlog, currentUser, handlerTaskEdit);
+      displayTasks(tasksColumns, currentUser, handlerTaskEdit);
       modalWindow.hide();
       // deleteTaskBtn.classList.toggle("invisible");
       // taskEditOkBtn.classList.toggle("invisible");
@@ -291,7 +298,7 @@ function startApp() {
 
         // backlog.insertAdjacentHTML(
         //   "beforeend",
-        //   `<li class='task__item'>${task.own}: ${task.name}</li>`
+        //   `<li class='app-task__item'>${task.own}: ${task.name}</li>`
         // );
       } else {
         const task = new Task(inputTask.value, login);
@@ -299,7 +306,7 @@ function startApp() {
 
         // backlog.insertAdjacentHTML(
         //   "beforeend",
-        //   `<li class='task__item'>${task.name}</li>`
+        //   `<li class='app-task__item'>${task.name}</li>`
         // );
         // modalWindow.hide();
       }
@@ -307,7 +314,20 @@ function startApp() {
       // removeEvLisOnTask(tasks, handlerTaskEdit);
       // addEvLisOnTask(tasks, handlerTaskEdit);
       modalWindow.hide();
-      displayTasks(backlog, login, handlerTaskEdit);
+      displayTasks(tasksColumns, login, handlerTaskEdit);
+      console.log("localStorage.tasks", localStorage.tasks);
+    }
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // доделать перенос задачи на следующую стадию
+    function handlerMoveTask() {
+      inputTask.className = "input input-task invisible";
+      taskInputOkBtn.className = "btn btn-primary button-input invisible";
+      // кнопку add скрыть, apply отобразить
+      // в лейбл инпуте отобразить имя задачи
+      // в названии МО написать Move task to next stage
+      // не забыть после нажатия на applay вернуть настройки назад
+      // возможно написать функцию для сброса настроек в изначальный вариант?
+      modalWindow.show();
     }
 
     function handlerLoc() {
@@ -318,7 +338,7 @@ function startApp() {
     }
 
     // function clearTaskList() {
-    //   let taskList = document.querySelectorAll(".task__item");
+    //   let taskList = document.querySelectorAll(".app-task__item");
     //   console.log("taskList", taskList);
     //   console.log("taskList.length до", taskList.length);
 

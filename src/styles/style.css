@@ -51,14 +51,16 @@ h4 {
   border: 1px solid gray;
   border-radius: 5px;
   margin: 5px;
+  text-align: center;
 }
 
-.task__item {
+.app-task__item {
   background-color: #ffffff;
   margin: 2%;
   border-radius: 5px;
   word-break: break-all;
   cursor: pointer;
+  text-align: left;
 }
 
 .avatar {
@@ -73,6 +75,7 @@ h4 {
   border-radius: 20px;
 }
 
+/* проверить все ли классы используются в коде */
 .app-btn--invisible,
 .input-user-form--invisible,
 .button-input--invisible,

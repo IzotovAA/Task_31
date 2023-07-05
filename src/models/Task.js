@@ -10,6 +10,7 @@ export class Task extends BaseModel {
     // this.own = appState.currentUser.login;
     this.own = taskOwn;
     this.name = taskName;
+    this.location = "backlog";
     this.storageKey = "tasks";
   }
 
