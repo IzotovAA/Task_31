@@ -219,7 +219,7 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
   }
 };
 
-// отображает список пользователей
+// обновляет и отображает список пользователей в строке выбора
 export const updUserList = function () {
   if (localStorage.getItem("users")) {
     const userList = document.querySelectorAll("option");
@@ -243,8 +243,10 @@ export const updUserList = function () {
   }
 };
 
-// отображает список задач
-export const updTasksList = function () {
+// обновляет и отображает список задач в строке выбора (функция не проверена на практике)
+// работает не корректно
+// надо исправить, например в инпуте ready должны отображаться только задачи локализованные в backlog и т.д.
+export const updTasksList = function (field = "ready") {
   if (localStorage.getItem("tasks")) {
     const userList = document.querySelectorAll("option");
     const userListContainer = document.querySelector("#input-user");
@@ -255,12 +257,22 @@ export const updTasksList = function () {
       });
     }
 
+    const locationList = ["backlog", "ready", "inprogress", "finish"];
+    let displayField = "backlog";
+    for (let i = 1; i < locationList.length - 1; i++) {
+      if (locationList[i] == field) {
+        displayField = locationList[i - 1];
+      }
+    }
     const tasks = getFromStorage("tasks");
     for (const task of tasks) {
-      userListContainer.insertAdjacentHTML(
-        "beforeend",
-        `<option value="${task.name}">${task.name}</option>`
-      );
+      if (task.location == displayField) {
+        userListContainer.insertAdjacentHTML(
+          "beforeend",
+          `<option value="${task.id}">${task.name}</option>`
+        );
+      }
+
       // очистить инпут с выбором
       // отобразить в инпут всех существующих пользователей
     }
@@ -298,7 +310,7 @@ export const deleteFromStorage = function (key, id) {
   localStorage.setItem(key, JSON.stringify(tempArr));
 };
 
-// изменяет элемент в localStorage по ключу, id, изменяемому полу и информации в данном поле
+// изменяет элемент в localStorage по ключу, id, изменяемому полю и информации в данном поле
 export const editInStorage = function (key, id, changeItem, newInfo) {
   const storageData = getFromStorage(key);
   const tempArr = [];
@@ -317,15 +329,23 @@ export const editInStorage = function (key, id, changeItem, newInfo) {
   localStorage.setItem(key, JSON.stringify(tempArr));
 };
 
-// перемещает задачу на следующую стадию (работа функции не проверена на практике)
+// перемещает задачу на следующую стадию
 export const moveToNextStage = function (taskId) {
+  console.log("taskId", taskId);
   const locationList = ["backlog", "ready", "inprogress", "finish"];
   const storageData = getFromStorage("tasks");
   storageData.forEach((element) => {
+    // console.log("element.id == taskId", element.id == taskId);
     if (element.id == taskId) {
       if (element.location == locationList[3]) return false;
-      for (let i = 0; i < locationList.length - 1; i++) {
-        if (location[i] == element.location) {
+      for (let i = 0; i < locationList.length - 2; i++) {
+        // console.log(
+        //   "location[i] == element.location",
+        //   location[i] == element.location
+        // );
+        // console.log("element.location", element.location);
+        // console.log("location[i]", location[i]);
+        if (locationList[i] == element.location) {
           editInStorage("tasks", taskId, "location", locationList[i + 1]);
           break;
         }

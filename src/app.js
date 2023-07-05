@@ -26,6 +26,8 @@ import { displayTasks } from "./utils";
 import { updUserList } from "./utils";
 import { removeEvLisOnTask } from "./utils";
 import { addEvLisOnTask } from "./utils";
+import { updTasksList } from "./utils";
+import { moveToNextStage } from "./utils";
 
 export const appState = new State();
 export const inputUser = document.querySelector("#input-user");
@@ -60,8 +62,9 @@ const modalAlert = new Modal(document.querySelector("#alert"));
 
 const navbar = document.querySelector(".navbar");
 const content = document.querySelector("#content");
-// const inputTaskLabel = document.querySelector("#staticBackdropLabel");
+const inputTaskLabel = document.querySelector("#staticBackdropLabel");
 const inputTask = document.querySelector(".input-task");
+// const inputTaskLabel = document.querySelector(".input-task-label");
 
 const inputUserForm = document.querySelector("#input-user-form");
 // const inputTaskEdit = document.querySelector("#input-task-edit");
@@ -70,6 +73,8 @@ const inputLogin = document.querySelector(".input-login");
 const inputPass1 = document.querySelector(".input-password-1");
 const inputPass2 = document.querySelector(".input-password-2");
 const alertMessage = document.querySelector("#alert-message");
+
+let applyBtnFlag = "TaskEdit";
 
 localStorage.clear();
 generateTestUser(User);
@@ -202,6 +207,7 @@ function startApp() {
     // localBtn.addEventListener("click", handlerLoc);
 
     function handlerTaskEdit(e) {
+      applyBtnFlag = "TaskEdit";
       // const login = appState.currentUser.login;
       inputUserForm.className = "div-inp input-user-form--invisible";
       console.log("handlerTaskEdit", "this", this);
@@ -224,13 +230,27 @@ function startApp() {
     function handlerTaskEditOkBtn() {
       // const tasks = getFromStorage("tasks");
 
-      editInStorage("tasks", taskId, "name", inputTask.value);
+      if (applyBtnFlag == "TaskEdit") {
+        editInStorage("tasks", taskId, "name", inputTask.value);
+        taskId = "";
+      } else if (applyBtnFlag == "MoveTask") {
+        // inputUser.value;
+        console.log("inputUser.value", inputUser.value);
+        moveToNextStage(inputUser.value);
+      }
 
       modalWindow.hide();
       deleteTaskBtn.className = "btn btn-primary button-task-delete invisible";
       taskEditOkBtn.className =
         "btn btn-primary button-input-taskedit invisible";
       taskInputOkBtn.className = "btn btn-primary button-input";
+
+      inputTask.className = "input input-task"; // input скрыть
+      taskInputOkBtn.className = "btn btn-primary button-input"; // кнопку add скрыть
+      taskEditOkBtn.className =
+        "btn btn-primary button-input-taskedit invisible"; // кнопку apply отобразить
+      inputTaskLabel.innerHTML = "Input task name";
+      inputUserForm.className = "div-inp input-user-form invisible";
 
       displayTasks(tasksColumns, currentUser, handlerTaskEdit);
     }
@@ -319,9 +339,29 @@ function startApp() {
     }
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // доделать перенос задачи на следующую стадию
-    function handlerMoveTask() {
-      inputTask.className = "input input-task invisible";
-      taskInputOkBtn.className = "btn btn-primary button-input invisible";
+    // сделать функцию сброса в изначальные настройки видимости и надписей в полях МО
+    // запускать эту функцию при нажатии отмена на МО
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    function handlerMoveTask(e) {
+      const locationList = ["backlog", "ready", "inprogress", "finish"];
+      applyBtnFlag = "MoveTask";
+      inputTask.className = "input input-task invisible"; // input скрыть
+      taskInputOkBtn.className = "btn btn-primary button-input invisible"; // кнопку add скрыть
+      taskEditOkBtn.className = "btn btn-primary button-input-taskedit"; // кнопку apply отобразить
+      inputTaskLabel.innerHTML = "Move task to next stage";
+
+      for (const location of locationList) {
+        if (e.target.id.match(location)) {
+          updTasksList(location);
+        }
+      }
+      // e.target.id.math();
+      // this.id.math(???)
+      // updTasksList();
+      inputUserForm.className = "div-inp input-user-form";
+      console.log("this", this);
+      console.log("e.target.id", e.target.id);
+
       // кнопку add скрыть, apply отобразить
       // в лейбл инпуте отобразить имя задачи
       // в названии МО написать Move task to next stage
