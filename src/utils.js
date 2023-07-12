@@ -2,6 +2,9 @@
 
 import { appState } from "./app";
 
+// массив полей статуса
+const locationList = ["backlog", "ready", "inprogress", "finished"];
+
 // достаёт данные из localStorage
 export const getFromStorage = function (key) {
   return JSON.parse(localStorage.getItem(key) || "[]");
@@ -59,10 +62,6 @@ export const isTheLoginFree = function (login) {
 export const displayTasks = function (taskFieldList, login, handlerTask) {
   // ищем и сохраняем списки задач пользователей (если задачи отображались при админе)
   let userOfTaskList = document.querySelectorAll(".app-task__user");
-
-  // backlog (taskField)
-  // app-task__user (userOfTaskList)
-  // app-task__item (taskList)
 
   // если админ и списки задач найдены, то перебираем поля статусов
   // ищем в них и удаляем списки задач пользователей
@@ -184,65 +183,77 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
 
     // вешаем прослушку на каждую задачу, обработчик берём из аргумента
     addEvLisOnTask(taskList, handlerTask);
-  }
+
+    // обновляем количество задач в footer
+    // активные - поле inprogress, законченные - поле finished
+    displayFooterTasksStatus(taskFieldList[2], taskFieldList[3]);
+  } else displayFooterTasksStatus(taskFieldList[2], taskFieldList[3]);
 };
 // ...
 
-// обновляет и отображает список пользователей в строке выбора !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// остановился тут
+// обновляет и отображает список пользователей в строке выбора
 export const updUserList = function () {
+  // если в localStorage есть пользователи
   if (localStorage.getItem("users")) {
     const userList = document.querySelectorAll("option");
     const userListContainer = document.querySelector("#input-user");
-    // console.log("userList", userList);
+    // если что-то найдено во всплывающем списке
     if (userList.length) {
+      // перебираем элементы списка и удаляем их
       userList.forEach((element) => {
         userListContainer.removeChild(element);
       });
     }
 
     const users = getFromStorage("users");
+    // перебираем список пользователей и отображаем их
     for (const user of users) {
       userListContainer.insertAdjacentHTML(
         "beforeend",
         `<option value="${user.login}">${user.login}</option>`
       );
-      // очистить инпут с выбором
-      // отобразить в инпут всех существующих пользователей
     }
   }
 };
+// ...
 
-// обновляет и отображает список задач в строке выбора (функция не проверена на практике)
-// работает не корректно
-// надо исправить, например в инпуте ready должны отображаться только задачи локализованные в backlog и т.д.
-// что то не так работает с добавлением задач в finished, хочет брать из backlog, а должна из inprogress !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+// обновляет и отображает список задач во всплывающем списке,
+// аргумент поле статуса в котором была нажата кнопка добавления задачи
 export const updTasksList = function (field) {
+  // если в localStorage есть задачи
   if (localStorage.getItem("tasks")) {
-    const userList = document.querySelectorAll("option");
-    const userListContainer = document.querySelector("#input-user");
-    const locationList = ["backlog", "ready", "inprogress", "finished"];
-    let displayField = "backlog";
+    const taskList = document.querySelectorAll("option"); // всплывающий список
+    const taskListContainer = document.querySelector("#input-user"); // контейнер списка
+    // const locationList = ["backlog", "ready", "inprogress", "finished"];
+    let displayField = "backlog"; // поле статуса откуда должны браться задачи
     const user = appState.currentUser.login;
     const tasks = getFromStorage("tasks");
 
-    if (userList.length) {
-      userList.forEach((element) => {
-        userListContainer.removeChild(element);
+    // если во всплывающем списке что-то есть удаляем это
+    if (taskList.length) {
+      taskList.forEach((element) => {
+        taskListContainer.removeChild(element);
       });
     }
 
+    // перебираем поля статусов для установки displayField
     for (let i = 0; i < locationList.length; i++) {
+      // если поле статуса совпадает с аргументом,
       if (locationList[i] == field) {
+        // то устанавливаем displayField предъидущее поле статуса
+        // при попытке добавить задачу в ready,
+        // в списке должны отображаться задачи и backlog и т.д.
         displayField = locationList[i - 1];
       }
     }
 
+    // перебираем задачи
     for (const task of tasks) {
+      // если displayField совпадает со статусом задачи
       if (task.location == displayField) {
+        // и если админ или владелец задачи, то отображаем её во всплывающем списке
         if (user == "admin" || task.own == user) {
-          userListContainer.insertAdjacentHTML(
+          taskListContainer.insertAdjacentHTML(
             "beforeend",
             `<option value="${task.id}">${task.name}</option>`
           );
@@ -251,14 +262,7 @@ export const updTasksList = function (field) {
     }
   }
 };
-
-// export const removeEvLisOnTask = function (tasks, handlerTask) {
-//   if (tasks.length) {
-//     for (const task of tasks) {
-//       task.removeEventListener("click", handlerTask);
-//     }
-//   }
-// };
+// ...
 
 // вешает прослушку handlerTask на каждый элемент DOM из массива tasks
 export const addEvLisOnTask = function (tasks, handlerTask) {
@@ -268,6 +272,7 @@ export const addEvLisOnTask = function (tasks, handlerTask) {
     }
   }
 };
+// ...
 
 // удаляет элемент из localStorage по ключу и id
 export const deleteFromStorage = function (key, id) {
@@ -282,43 +287,49 @@ export const deleteFromStorage = function (key, id) {
 
   localStorage.setItem(key, JSON.stringify(tempArr));
 };
+// ...
 
-// изменяет элемент в localStorage по ключу, id, изменяемому полю и информации в данном поле
+// изменяет элемент в localStorage по ключу, id, изменяемому полю и информации
 export const editInStorage = function (key, id, changeItem, newInfo) {
   const storageData = getFromStorage(key);
   const tempArr = [];
 
+  // перебираем элементы
   storageData.forEach((element) => {
+    // если id не совпадают
     if (element.id != id) {
-      tempArr.push(element);
-      deleteFromStorage(key, element.id);
-    } else {
-      element[changeItem] = newInfo;
-      tempArr.push(element);
-      deleteFromStorage(key, id);
+      tempArr.push(element); // добавляем элемент во временный массив
+      deleteFromStorage(key, element.id); // удаляем элемент из localStorage
+    }
+
+    // если id совпадают
+    else {
+      element[changeItem] = newInfo; // изменяем заданное поле элемента, заданной информацией
+      tempArr.push(element); // добавляем элемент во временный массив
+      deleteFromStorage(key, id); // удаляем элемент из localStorage
     }
   });
 
+  // сохраняем в localStorage временный массив с изменённым элементом
   localStorage.setItem(key, JSON.stringify(tempArr));
 };
+// ...
 
-// перемещает задачу на следующую стадию
+// перемещает задачу на следующую стадию (в следующее поле статуса)
 export const moveToNextStage = function (taskId) {
-  console.log("taskId", taskId);
-  const locationList = ["backlog", "ready", "inprogress", "finished"];
+  // const locationList = ["backlog", "ready", "inprogress", "finished"];
   const storageData = getFromStorage("tasks");
+  // перебираем задачи
   storageData.forEach((element) => {
-    // console.log("element.id == taskId", element.id == taskId);
+    // если id задачи совпадает с аргументом
     if (element.id == taskId) {
-      if (element.location == locationList[3]) return false;
+      if (element.location == locationList[3]) return false; // из finished не переносим
+      // перебираем поля статусов
       for (let i = 0; i < locationList.length - 1; i++) {
-        // console.log(
-        //   "location[i] == element.location",
-        //   location[i] == element.location
-        // );
-        // console.log("element.location", element.location);
-        // console.log("location[i]", location[i]);
+        // если поле статуса совпадает со статусом задачи
         if (locationList[i] == element.location) {
+          // изменяем статус задачи на следующий из списка
+          // например backlog на ready и т.д.
           editInStorage("tasks", taskId, "location", locationList[i + 1]);
           break;
         }
@@ -326,3 +337,99 @@ export const moveToNextStage = function (taskId) {
     }
   });
 };
+// ...
+
+// обновляет disabled статус кнопок добавления задачи за исключением кнопки в backlog
+export const updBtnStatus = function (taskFieldList) {
+  // находим и сохраняем в переменные DOM кнопок
+  const backlogAddTaskBtn = document.querySelector("#backlog-addtask-btn"); // активна если есть хоть один пользователь
+  const readyAddTaskBtn = document.querySelector("#ready-addtask-btn"); // должна быть активна если в backlog есть задача
+  const inProgAddTaskBtn = document.querySelector("#inprogress-addtask-btn"); // должна быть активна если в ready есть задача
+  const finishedAddTaskBtn = document.querySelector("#finished-addtask-btn"); // должна быть активна если в inprogress есть задача
+
+  // определяем флаги
+  let readyFlag = false,
+    inprogressFlag = false,
+    finishedFlag = false;
+
+  // перебираем DOM полей статусов, последнее поле finished не нужно
+  for (let i = 0; i < taskFieldList.length - 1; i++) {
+    let taskList = taskFieldList[i].querySelectorAll(".app-task__item"); // ищем задачи в данном поле статуса
+    // если что-то нашли
+    if (taskList.length) {
+      // проверяем кнопки, если какая то кнопка содержит в id название следующего статуса после данного,
+      // то флаг становится true, что означает что кнопка должна стать активной
+      // если совпадения нет, то оставляем флаг как есть
+      // например нашли что-то в backlog, значит кнопка в поле ready должна стать активной
+      // т.е. ready.disabled = false
+      readyAddTaskBtn.id.match(locationList[i + 1])
+        ? (readyFlag = true)
+        : readyFlag;
+      inProgAddTaskBtn.id.match(locationList[i + 1])
+        ? (inprogressFlag = true)
+        : inprogressFlag;
+      finishedAddTaskBtn.id.match(locationList[i + 1])
+        ? (finishedFlag = true)
+        : finishedFlag;
+    }
+  }
+
+  // в зависимости от состояния флагов делаем кнопки активными либо оставляем отключенными
+  readyFlag
+    ? (readyAddTaskBtn.disabled = false)
+    : (readyAddTaskBtn.disabled = true);
+  inprogressFlag
+    ? (inProgAddTaskBtn.disabled = false)
+    : (inProgAddTaskBtn.disabled = true);
+  finishedFlag
+    ? (finishedAddTaskBtn.disabled = false)
+    : (finishedAddTaskBtn.disabled = true);
+
+  updUserList(); // обновляем список пользователей
+  const inputUser = document.querySelector("#input-user"); // всплывающий список в МО
+  // если список пользователей пуст то делаем кнопку добавления задачи
+  // в backlog не активной, иначе активируем кнопку
+  if (!inputUser.value) {
+    backlogAddTaskBtn.disabled = true;
+  } else backlogAddTaskBtn.disabled = false;
+};
+// ...
+
+// подсчитывает количество задач в поле статуса
+export const taskSum = function (field) {
+  let count = 0;
+  // ищем задачи в заданном поле
+  const tasks = field.querySelectorAll(".app-task__item");
+  // если что-то нашлось, то перебираем задачи
+  // и каждый раз увеличиваем счётчик на 1
+  if (tasks.length) {
+    tasks.forEach(() => {
+      count++;
+    });
+  }
+  return count;
+};
+// ...
+
+// обновляет количество задач в footer
+export const displayFooterTasksStatus = function (activeField, finishedField) {
+  const active = document.querySelector(".app-active-tasks");
+  const finished = document.querySelector(".app-finished-tasks");
+  const countActive = taskSum(activeField);
+  const countFinished = taskSum(finishedField);
+  active.innerHTML = `Ative tasks: ${countActive}`;
+  finished.innerHTML = `Finished tasks: ${countFinished}`;
+};
+// ...
+
+// находит и возвращает id пользователя по имени, если не находит возвращает null
+export const userIdByName = function (userName) {
+  const storageData = getFromStorage("users");
+  let id = null;
+  if (!storageData.length) return null;
+  storageData.forEach((element) => {
+    element.login == userName ? (id = element.id) : id;
+  });
+  return id;
+};
+// ...

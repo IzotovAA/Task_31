@@ -11,7 +11,6 @@ export const authUser = function (login, password) {
     return true;
   } else if (admin.hasAccess) {
     appState.currentUser = admin;
-    console.log(appState.currentUser);
     return true;
   } else return false;
 };

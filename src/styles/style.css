@@ -4,6 +4,22 @@
   font-family: Roboto, Arial, Helvetica, sans-serif;
 }
 
+header,
+footer {
+  background-color: #0067a3;
+  height: 55px;
+}
+
+main {
+  background-color: #0079bf;
+}
+
+footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: center;
+}
+
 ul {
   padding: 5px;
 }
@@ -12,7 +28,9 @@ li {
   list-style-type: none;
 }
 
-h4 {
+h2,
+h4,
+h5 {
   margin: 0 auto;
   text-align: center;
 }
@@ -21,13 +39,34 @@ h4 {
   margin: 0px 10px 0px 10px;
 }
 
+.btn-light {
+  background-color: #ebecf0;
+  font-size: 18px;
+  font-weight: 600;
+  color: #5e6c84;
+}
+
+.btn-light:disabled {
+  font-weight: 400;
+}
+
+.app-footer {
+  font-size: 18px;
+  font-weight: 400;
+  color: #ffffff;
+}
+
+.input-task-label {
+  justify-content: start;
+}
+
 #app-login-btn {
   width: 160px;
 }
 
-.container {
+/* .app-task {
   display: flex;
-}
+} */
 
 .app-column {
   width: 20vw;
@@ -36,7 +75,7 @@ h4 {
   border: 1px solid black;
   border-radius: 10px;
   padding: 5px;
-  margin: 5px;
+  margin: 2%;
   background-color: #ebecf0;
   overflow: auto;
 }
@@ -52,11 +91,14 @@ h4 {
   border-radius: 5px;
   margin: 5px;
   text-align: center;
+  font-size: 18px;
+  font-weight: 400;
 }
 
 .app-task__item {
   background-color: #ffffff;
-  margin: 2%;
+  margin: 20px 2%;
+  padding: 2% 3%;
   border-radius: 5px;
   word-break: break-all;
   cursor: pointer;
@@ -75,21 +117,12 @@ h4 {
   border-radius: 20px;
 }
 
-/* проверить все ли классы используются в коде */
 .app-btn--invisible,
 .input-user-form--invisible,
 .button-input--invisible,
-.button-task-delete--invisible {
-  display: none;
-}
-
 .invisible {
   display: none;
 }
-
-/* .input-user-form--invisible {
-  display: none;
-} */
 
 .app-navbar-brand {
   /* font-family: Roboto, Arial, Helvetica, sans-serif; */
@@ -108,9 +141,40 @@ h4 {
   font-size: 20px;
   font-weight: 400;
   color: white;
-  /* justify-content: center; */
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-content: center;
   padding: 0;
 }
 
-/* #greetings {
-} */
+#content {
+  min-height: calc(100vh - 110px);
+  width: 100%;
+}
+
+#content h2 {
+  color: #f5f5f5;
+  margin: 2%;
+}
+
+.app-footter-info {
+  margin: 0 1vw;
+}
+
+#app-login-form input {
+  background-color: #edebeb;
+  cursor: pointer;
+}
+
+#app-login-form input:hover,
+#app-login-form input:focus {
+  background-color: #95d6f5;
+}
+
+.modal-content {
+  background-color: #ebecf0;
+}
+
+.modal-content input {
+}

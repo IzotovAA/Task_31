@@ -7,56 +7,57 @@
     <title>Simple TODO App</title>
   </head>
 
-  <body class="bg-light">
-    <!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark" > -->
-    <nav class="navbar navbar-expand-lg" style="background-color: #0067a3">
-      <!-- <div class="container-fluid">
-        <a class="navbar-brand" href="#">SimpleTODO</a>
-        <button
-          class="navbar-toggler"
-          type="button"
-          data-bs-toggle="collapse"
-          data-bs-target="#navbarSupportedContent"
-          aria-controls="navbarSupportedContent"
-          aria-expanded="false"
-          aria-label="Toggle navigation"
-        >
-          <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
-          <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-            <li class="nav-item">
-              <a class="nav-link active" aria-current="page" href="#">Home</a>
-            </li>
-          </ul>
-          <form id="app-login-form" class="d-flex">
-            <input
-              class="form-control me-2"
-              name="login"
-              autocomplete="username"
-              type="text"
-              placeholder="Login"
-              aria-label="Login"
-            />
-            <input
-              class="form-control me-2"
-              name="password"
-              autocomplete="current-password"
-              type="password"
-              placeholder="Password"
-              aria-label="Password"
-            />
-            <button
-              id="app-login-btn"
-              class="btn btn-outline-info"
-              type="submit"
-            >
-              Sign In
-            </button>
-          </form>
-        </div>
-      </div> -->
-    </nav>
+  <body>
+    <header>
+      <nav class="navbar navbar-expand-lg">
+        <!-- <div class="container-fluid">
+          <a class="navbar-brand" href="#">SimpleTODO</a>
+          <button
+            class="navbar-toggler"
+            type="button"
+            data-bs-toggle="collapse"
+            data-bs-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent"
+            aria-expanded="false"
+            aria-label="Toggle navigation"
+          >
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+              <li class="nav-item">
+                <a class="nav-link active" aria-current="page" href="#">Home</a>
+              </li>
+            </ul>
+            <form id="app-login-form" class="d-flex">
+              <input
+                class="form-control me-2"
+                name="login"
+                autocomplete="username"
+                type="text"
+                placeholder="Login"
+                aria-label="Login"
+              />
+              <input
+                class="form-control me-2"
+                name="password"
+                autocomplete="current-password"
+                type="password"
+                placeholder="Password"
+                aria-label="Password"
+              />
+              <button
+                id="app-login-btn"
+                class="btn btn-outline-info"
+                type="submit"
+              >
+                Sign In
+              </button>
+            </form>
+          </div>
+        </div> -->
+      </nav>
+    </header>
 
     <main>
       <!-- Модальное окно (МО) добавления задачи -->
@@ -79,7 +80,7 @@
 
             <div class="modal-body">
               <h6>
-                <div class="div-inp input-task-label">Input task name</div>
+                <div class="div-inp input-task-label">Task name</div>
               </h6>
               <input type="text" value="task1" class="input input-task" />
               <!-- <h6>
@@ -103,7 +104,7 @@
                 id="input-user-form"
               >
                 <h6>
-                  <div class="div-inp input-user-label">Select user</div>
+                  <div class="div-inp input-user-label">Select a user</div>
                 </h6>
                 <select class="div-inp input-user" name="user" id="input-user">
                   <option value="test">test</option>
@@ -119,20 +120,20 @@
               >
                 Cancel
               </button>
-              <button type="button" class="btn btn-primary button-input">
+              <button type="button" class="btn btn-success button-input">
                 Add
               </button>
 
               <!-- Модификация МО для редактирования задач-->
               <button
                 type="button"
-                class="btn btn-primary button-input-taskedit invisible"
+                class="btn btn-success button-input-taskedit invisible"
               >
                 Apply
               </button>
               <button
                 type="button"
-                class="btn btn-primary button-task-delete invisible"
+                class="btn btn-warning button-task-delete invisible"
               >
                 Delete task
               </button>
@@ -192,7 +193,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-primary button-input-adduser"
+                class="btn btn-success button-input-adduser"
               >
                 Apply
               </button>
@@ -234,11 +235,26 @@
         </div>
       </div>
 
-      <div class="container">
+      <div class="container-fluid d-flex justify-content-center">
         <div id="content">
           <h2>Please Sign In to see your tasks!</h2>
         </div>
       </div>
     </main>
+
+    <footer>
+      <div class="container-fluid" id="footer">
+        <!-- <div class="d-flex justify-content-between app-footer">
+          <div class="d-flex">
+            <div class="app-active-tasks">Ative: 5</div>
+            <div class="app-finished-tasks">Finished: 3</div>
+          </div>
+          <div class="d-flex">
+            <div class="app-user-name">Kanban board by admin</div>
+            <div class="app-year">2023</div>
+          </div>
+        </div> -->
+      </div>
+    </footer>
   </body>
 </html>
