@@ -35,6 +35,7 @@ export const appState = new State();
 // удаление пользователя реализовал, надо сделать изменение иконки пользователя в зависимости
 // от попап окна, открыто/закрыто, а так же реализовать попап окно на иконку пользователя
 // и на бургер меню, а точнее подумать нужно ли оно вообще
+// бургер меню, да и сам список в ПН не нужен, модифицировать
 
 // назначение модального окна (МО) добавления задачи
 const modalWindow = new Modal(document.querySelector("#staticBackdrop"));
@@ -43,9 +44,9 @@ const modalWindow = new Modal(document.querySelector("#staticBackdrop"));
 const modalWindowElement = document.querySelector("#staticBackdrop");
 
 // кнопки в МО
-const taskAddOkBtn = document.querySelector(".button-input"); // кнопка Add
-const taskEditOkBtn = document.querySelector(".button-input-taskedit"); // кнопка Apply
-const deleteTaskBtn = document.querySelector(".button-task-delete"); // кнопка Delete task
+const taskAddOkBtn = document.querySelector(".app-button-input"); // кнопка Add
+const taskEditOkBtn = document.querySelector(".app-button-input-taskedit"); // кнопка Apply
+const deleteTaskBtn = document.querySelector(".app-button-task-delete"); // кнопка Delete task
 
 // назначение модального окна добавления нового пользователя
 const modalWindowAddUser = new Modal(
@@ -53,7 +54,7 @@ const modalWindowAddUser = new Modal(
 );
 
 // кнопка Apply в модальном окне добавления пользователя
-const taskInputAddUserBtn = document.querySelector(".button-input-adduser");
+const taskInputAddUserBtn = document.querySelector(".app-button-input-adduser");
 
 // назначение модального окна alert
 const modalAlert = new Modal(document.querySelector("#alert"));
@@ -63,16 +64,17 @@ const navbar = document.querySelector(".navbar"); // панель навигац
 const content = document.querySelector("#content"); // для вставления основного содержания, задач
 const footer = document.querySelector("#footer"); // футер
 const modalWindowLabel = document.querySelector("#staticBackdropLabel"); // заголовок МО добавления задач
-const inputTask = document.querySelector(".input-task"); // input в МО добавления задач
-const inputTaskLabel = document.querySelector(".input-task-label"); // надпись над input в МО
+const inputTask = document.querySelector(".app-input-task"); // input в МО добавления задач
+const inputTaskLabel = document.querySelector(".app-input-task-label"); // надпись над input в МО
 const inputUser = document.querySelector("#input-user"); // всплывающий список в МО
-const inputUserLabel = document.querySelector(".input-user-label"); // надпись над всплывающим списком в МО
+const inputUserLabel = document.querySelector(".app-input-user-label"); // надпись над всплывающим списком в МО
 const inputUserForm = document.querySelector("#input-user-form"); // обёртка всплывающего списка
+const popup = document.querySelector(".app-popup"); // popup меню
 
 // input в МО создания нового пользователя
-const inputLogin = document.querySelector(".input-login");
-const inputPass1 = document.querySelector(".input-password-1");
-const inputPass2 = document.querySelector(".input-password-2");
+const inputLogin = document.querySelector(".app-input-login");
+const inputPass1 = document.querySelector(".app-input-password-1");
+const inputPass2 = document.querySelector(".app-input-password-2");
 
 const alertMessage = document.querySelector("#alert-message"); // поле сообщения alert
 
@@ -152,9 +154,16 @@ function startApp() {
     username.innerHTML = `Kanban board by ${currentUser}, ${new Date().getFullYear()}`;
 
     // назначение DOM элементов после авторизации и отображения соответствующей информации
+    const avatar = document.querySelector(".app-avatar"); // иконки пользователя (userMenuClose и userMenuOpen)
+    const userMenuClose = document.querySelector("#user-menu-close"); // иконка пользователя при закрытом меню
+    const userMenuOpen = document.querySelector("#user-menu-open"); // иконка пользователя при открытом меню
     const logoutBtn = document.querySelector("#app-logout-btn"); // кнопка выхода
     const addUserBtn = document.querySelector("#app-adduser-btn"); // кнопка добавления нового пользователя
     const deleteUserBtn = document.querySelector("#app-deleteuser-btn"); // кнопка удаления пользователя
+
+    // выставляем статус иконки по умолчанию (меню закрыто)
+    userMenuClose.classList.remove("invisible");
+    userMenuOpen.classList.add("invisible");
 
     // кнопки добавления задач в полях статусов
     const backlogAddTaskBtn = document.querySelector("#backlog-addtask-btn");
@@ -163,21 +172,21 @@ function startApp() {
     const finishedAddTaskBtn = document.querySelector("#finished-addtask-btn");
 
     // поля статусов задач
-    const backlog = document.querySelector(".backlog");
-    const ready = document.querySelector(".ready");
-    const inprogress = document.querySelector(".inprogress");
-    const finished = document.querySelector(".finished");
+    const backlog = document.querySelector(".app-backlog");
+    const ready = document.querySelector(".app-ready");
+    const inprogress = document.querySelector(".app-inprogress");
+    const finished = document.querySelector(".app-finished");
 
     // сохраняем список полей статусов задач в массив
     const tasksColumns = [backlog, ready, inprogress, finished];
 
     // если пользователь админ отображает необходимую информацию
     if (isCurrentUserAdmin()) {
-      addUserBtn.className = "btn btn-outline-info";
-      deleteUserBtn.className = "btn btn-outline-info";
+      addUserBtn.classList.remove("invisible");
+      deleteUserBtn.classList.remove("invisible");
     } else {
-      addUserBtn.className = "btn btn-outline-info app-btn--invisible";
-      deleteUserBtn.className = "btn btn-outline-info app-btn--invisible";
+      addUserBtn.classList.add("invisible");
+      deleteUserBtn.classList.add("invisible");
     }
     // ...
 
@@ -185,6 +194,7 @@ function startApp() {
     updBtnStatus(tasksColumns); // обновляем статусы кнопок
 
     // добавляем прослушку
+    avatar.addEventListener("click", handlerAvatar); // иконки пользователя
     addUserBtn.addEventListener("click", handlerAddUser); // кнопка добавления пользователя
     deleteUserBtn.addEventListener("click", handlerDeleteUser); // кнопка удаления пользователя
     logoutBtn.addEventListener("click", handlerLogout); // кнопка выхода
@@ -197,18 +207,25 @@ function startApp() {
     deleteTaskBtn.addEventListener("click", handlerDeleteTaskBtn); // кнопка Delete в МО
     taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn); // слушатель на кнопку AddUser
 
+    // переключает вид иконки пользователя
+    function handlerAvatar() {
+      userMenuClose.classList.toggle("invisible");
+      userMenuOpen.classList.toggle("invisible");
+      popup.classList.toggle("invisible");
+      console.log("переключение");
+    }
+    // ...
+
     // отображает МО с необходимой информацией при нажатии на задачу
     function handlerTaskEdit(e) {
       applyBtnFlag = "TaskEdit"; // установка флага для использования МО для редактирования задачи
-      inputUserForm.className = "div-inp input-user-form--invisible"; // скрываем всплывающий список
+      inputUserForm.classList.add("invisible"); // скрываем всплывающий список
       inputTask.value = this.innerHTML; // отображаем в инпуте название текущей задачи
-      taskEditOkBtn.className = "btn btn-success button-input-taskedit"; // отображаем кнопку Apply
-      taskAddOkBtn.className = "btn btn-success button-input--invisible"; // скрываем кнопку Add
-
+      taskEditOkBtn.classList.remove("invisible"); // отображаем кнопку Apply
+      taskAddOkBtn.classList.add("invisible"); // скрываем кнопку Add
       taskId = e.target.id; // сохраняем id редактируемой задачи
       // если админ, отображаем кнопку Delete
-      if (currentUser == "admin")
-        deleteTaskBtn.className = "btn btn-warning button-task-delete";
+      if (currentUser == "admin") deleteTaskBtn.classList.remove("invisible");
 
       modalWindow.show(); // отображаем МО
     }
@@ -239,14 +256,13 @@ function startApp() {
       modalWindow.hide(); // скрываем МО
 
       // выставление состояния элементов по умолчанию
-      deleteTaskBtn.className = "btn btn-warning button-task-delete invisible"; // кнопка удаления задачи
-      taskEditOkBtn.className =
-        "btn btn-success button-input-taskedit invisible"; // кнопка Apply
-      taskAddOkBtn.className = "btn btn-success button-input"; // кнопка Add
-      inputTask.className = "input input-task"; // input в МО добавления задач
-      inputTaskLabel.className = "div-inp input-task-label"; // надпись над input в МО
+      deleteTaskBtn.classList.add("invisible"); // кнопка удаления задачи
+      taskEditOkBtn.classList.add("invisible"); // кнопка Apply
+      taskAddOkBtn.classList.remove("invisible"); // кнопка Add
+      inputTask.classList.remove("invisible"); // input в МО добавления задач
+      inputTaskLabel.classList.remove("invisible"); // надпись над input в МО
       modalWindowLabel.innerHTML = "Input task name"; // заголовок МО добавления задач
-      inputUserForm.className = "div-inp input-user-form invisible"; // всплывающий список
+      inputUserForm.classList.add("invisible"); // всплывающий список
 
       displayTasks(tasksColumns, currentUser, handlerTaskEdit);
       updBtnStatus(tasksColumns);
@@ -260,15 +276,20 @@ function startApp() {
       updBtnStatus(tasksColumns);
       modalWindow.hide(); // скрываем МО
 
-      deleteTaskBtn.className = "btn btn-warning button-task-delete invisible"; // скрываем Delete
-      taskEditOkBtn.className =
-        "btn btn-success button-input-taskedit invisible"; // скрываем Apply
-      taskAddOkBtn.className = "btn btn-success button-input"; // отображаем Add
+      deleteTaskBtn.classList.add("invisible"); // скрываем Delete
+      taskEditOkBtn.classList.add("invisible"); // скрываем Apply
+      taskAddOkBtn.classList.remove("invisible"); // отображаем Add
     }
     // ...
 
     // срабатывает при нажатии на кнопку добавления нового пользователя, отображает МО
     function handlerAddUser() {
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
+
       modalWindowAddUser.show();
     }
     // ...
@@ -278,13 +299,19 @@ function startApp() {
       applyBtnFlag = "DeleteUser"; // установка флага
 
       // настраиваем отображение элементов МО
-      taskEditOkBtn.className = "btn btn-success button-input-taskedit"; // кнопка Apply отображаем
-      taskAddOkBtn.className = "btn btn-success button-input--invisible"; // кнопка Add скрываем
-      inputTask.className = "input input-task invisible"; // input в МО добавления задач скрываем
-      inputTaskLabel.className = "div-inp input-task-label invisible"; // надпись над input скрываем
+      taskEditOkBtn.classList.remove("invisible"); // кнопка Apply отображаем
+      taskAddOkBtn.classList.add("invisible"); // кнопка Add скрываем
+      inputTask.classList.add("invisible"); // input в МО добавления задач скрываем
+      inputTaskLabel.classList.add("invisible"); // надпись над input скрываем
+      inputUserForm.classList.remove("invisible"); // всплывающий список отображаем
       modalWindowLabel.innerHTML = "Delete user"; // заголовок МО добавления задач
-      inputUserForm.className = "div-inp input-user-form"; // всплывающий список отображаем
       inputUserLabel.innerHTML = "Select a user"; // меняем надпись над всплывающим списком
+
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
 
       updUserList();
       modalWindow.show(); // отображаем МО
@@ -306,6 +333,7 @@ function startApp() {
 
       taskId = ""; // сброс id
       applyBtnFlag = "TaskEdit"; // сброс флага для функционала кнопки Apply в МО задачи
+      popup.classList.add("invisible"); // скрываем popup
 
       return startApp(); // перезапуск приложения
     }
@@ -315,9 +343,9 @@ function startApp() {
     function handlerAddTask() {
       // если админ отображает всплывающий список иначе скрывает
       if (currentUser == "admin") {
-        inputUserForm.className = "div-inp input-user-form";
+        inputUserForm.classList.remove("invisible");
       } else {
-        inputUserForm.className = "div-inp input-user-form--invisible";
+        inputUserForm.classList.add("invisible");
       }
 
       modalWindow.show(); // отображаем МО
@@ -349,10 +377,10 @@ function startApp() {
       applyBtnFlag = "MoveTask";
 
       // настройка нужного отображения
-      inputTaskLabel.className = "div-inp input-task-label invisible"; // надпись над input скрываем
-      inputTask.className = "input input-task invisible"; // input скрываем
-      taskAddOkBtn.className = "btn btn-success button-input invisible"; // кнопку add скрываем
-      taskEditOkBtn.className = "btn btn-success button-input-taskedit"; // кнопку apply отображаем
+      inputTaskLabel.classList.add("invisible"); // надпись над input скрываем
+      inputTask.classList.add("invisible"); // input скрываем
+      taskAddOkBtn.classList.add("invisible"); // кнопку add скрываем
+      taskEditOkBtn.classList.remove("invisible"); // кнопку apply отображаем
       modalWindowLabel.innerHTML = "Move task to next stage"; // меняем название МО
       inputUserLabel.innerHTML = "Select a task"; // меняем надпись над всплывающим списком
 
@@ -366,7 +394,7 @@ function startApp() {
         }
       }
 
-      inputUserForm.className = "div-inp input-user-form"; // отобразить всплывающий список
+      inputUserForm.classList.remove("invisible"); // отобразить всплывающий список
       modalWindow.show();
     }
     // ...
@@ -426,13 +454,13 @@ function startApp() {
 
 // сбрасывает необходимые настройки отображения к начальным
 function handlerDefault() {
-  inputTaskLabel.className = "div-inp input-task-label"; // отображаем надпись над input в МО
-  deleteTaskBtn.className = "btn btn-warning button-task-delete invisible"; // скрываем кнопку удаления задачи в МО
-  taskEditOkBtn.className = "btn btn-success button-input-taskedit invisible"; // скрываем кнопку Apply в МО
-  inputUserForm.className = "div-inp input-user-form invisible"; // скрываем всплывающий список в МО
+  inputTaskLabel.classList.remove("invisible"); // отображаем надпись над input в МО
+  deleteTaskBtn.classList.add("invisible"); // скрываем кнопку удаления задачи в МО
+  taskEditOkBtn.classList.add("invisible"); // скрываем кнопку Apply в МО
+  inputUserForm.classList.add("invisible"); // скрываем всплывающий список в МО
   modalWindowLabel.innerHTML = "Input task name"; // меняем название МО
   inputUserLabel.innerHTML = "Select a user"; // меняем надпись на всплывающим списком в МО
-  taskAddOkBtn.className = "btn btn-success button-input"; // отображаем кнопку Add в МО
-  inputTask.className = "input input-task"; // отображаем input в МО добавления задач
+  taskAddOkBtn.classList.remove("invisible"); // отображаем кнопку Add в МО
+  inputTask.classList.remove("invisible"); // отображаем input в МО добавления задач
 }
 // ...

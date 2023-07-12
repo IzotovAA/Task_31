@@ -80,9 +80,9 @@
 
             <div class="modal-body">
               <h6>
-                <div class="div-inp input-task-label">Task name</div>
+                <div class="div-inp app-input-task-label">Task name</div>
               </h6>
-              <input type="text" value="task1" class="input input-task" />
+              <input type="text" value="task1" class="input app-input-task" />
               <!-- <h6>
                 <div
                   class="div-inp input-user-label--invisible"
@@ -99,12 +99,9 @@
               /> -->
 
               <!-- Всплывающий список на замену input id="input-user" -->
-              <div
-                class="div-inp input-user-form--invisible"
-                id="input-user-form"
-              >
+              <div class="div-inp invisible" id="input-user-form">
                 <h6>
-                  <div class="div-inp input-user-label">Select a user</div>
+                  <div class="div-inp app-input-user-label">Select a user</div>
                 </h6>
                 <select class="div-inp input-user" name="user" id="input-user">
                   <option value="test">test</option>
@@ -120,20 +117,20 @@
               >
                 Cancel
               </button>
-              <button type="button" class="btn btn-success button-input">
+              <button type="button" class="btn btn-success app-button-input">
                 Add
               </button>
 
               <!-- Модификация МО для редактирования задач-->
               <button
                 type="button"
-                class="btn btn-success button-input-taskedit invisible"
+                class="btn btn-success app-button-input-taskedit invisible"
               >
                 Apply
               </button>
               <button
                 type="button"
-                class="btn btn-warning button-task-delete invisible"
+                class="btn btn-warning app-button-task-delete invisible"
               >
                 Delete task
               </button>
@@ -164,14 +161,14 @@
               <h6>
                 <div class="div-inp">Input user login</div>
               </h6>
-              <input type="text" value="login" class="input input-login" />
+              <input type="text" value="login" class="input app-input-login" />
               <h6>
                 <div class="div-inp">Input user password</div>
               </h6>
               <input
                 type="text"
                 value="password"
-                class="input input-password-1"
+                class="input app-input-password-1"
               />
               <h6>
                 <div class="div-inp">Confirm user password</div>
@@ -179,7 +176,7 @@
               <input
                 type="text"
                 value="password"
-                class="input input-password-2"
+                class="input app-input-password-2"
               />
             </div>
 
@@ -193,7 +190,7 @@
               </button>
               <button
                 type="button"
-                class="btn btn-success button-input-adduser"
+                class="btn btn-success app-button-input-adduser"
               >
                 Apply
               </button>
@@ -239,6 +236,12 @@
         <div id="content">
           <h2>Please Sign In to see your tasks!</h2>
         </div>
+      </div>
+
+      <div class="app-popup invisible">
+        <p class="app-popup__item" id="app-adduser-btn">Add New User</p>
+        <p class="app-popup__item" id="app-deleteuser-btn">Delete user</p>
+        <p class="app-popup__item" id="app-logout-btn">Sign Out</p>
       </div>
     </main>
 
