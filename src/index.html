@@ -7,8 +7,8 @@
     <title>Simple TODO App</title>
   </head>
 
-  <body>
-    <header>
+  <body class="app-body">
+    <header class="app-header">
       <nav class="navbar navbar-expand-lg">
         <!-- <div class="container-fluid">
           <a class="navbar-brand" href="#">SimpleTODO</a>
@@ -59,7 +59,7 @@
       </nav>
     </header>
 
-    <main>
+    <main class="app-main">
       <!-- Модальное окно (МО) добавления задачи -->
       <div
         class="modal fade"
@@ -104,7 +104,7 @@
                   <div class="div-inp app-input-user-label">Select a user</div>
                 </h6>
                 <select class="div-inp input-user" name="user" id="input-user">
-                  <option value="test">test</option>
+                  <option class="input-user__item" value="test">test</option>
                 </select>
               </div>
             </div>
@@ -232,20 +232,27 @@
         </div>
       </div>
 
+      <!-- Основоное содержание (задачи) -->
       <div class="container-fluid d-flex justify-content-center">
         <div id="content">
-          <h2>Please Sign In to see your tasks!</h2>
+          <h2 class="app-auth-message">Please Sign In to see your tasks!</h2>
         </div>
       </div>
 
+      <!-- popup  пользовательское меню -->
+      <div class="app-popup-bg invisible"></div>
       <div class="app-popup invisible">
+        <p class="app-popup__item" id="app-tasks-btn">My tasks</p>
+        <p class="app-popup__item" id="app-menu1-btn">Menu item 1</p>
+        <p class="app-popup__item" id="app-menu2-btn">Menu item 2</p>
         <p class="app-popup__item" id="app-adduser-btn">Add New User</p>
         <p class="app-popup__item" id="app-deleteuser-btn">Delete user</p>
+        <p class="app-popup__item" id="app-account-btn">My account</p>
         <p class="app-popup__item" id="app-logout-btn">Sign Out</p>
       </div>
     </main>
 
-    <footer>
+    <footer class="app-footer">
       <div class="container-fluid" id="footer">
         <!-- <div class="d-flex justify-content-between app-footer">
           <div class="d-flex">

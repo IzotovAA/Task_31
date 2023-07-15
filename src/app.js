@@ -6,8 +6,11 @@ import "./styles/style.css";
 import taskFieldTemplate from "./templates/taskField.html";
 import navbarAuthTemplate from "./templates/navbarAuth.html";
 import navbarNotAuthTemplate from "./templates/navbarNotAuth.html";
-import footerAuth from "./templates/footerAuth.html";
-import footerNotAuth from "./templates/footerNotAuth.html";
+import footerAuthTemplate from "./templates/footerAuth.html";
+import footerNotAuthTemplate from "./templates/footerNotAuth.html";
+import menu1Template from "./templates/menu1.html";
+import menu2Template from "./templates/menu2.html";
+import myAccountTemplate from "./templates/account.html";
 import { User } from "./models/User";
 import { Admin } from "./models/Admin";
 import { Task } from "./models/Task";
@@ -21,7 +24,7 @@ import {
   editInStorage,
   isCurrentUserAdmin,
   isTheLoginFree,
-  addUser,
+  addNewUser,
   displayTasks,
   updUserList,
   updTasksList,
@@ -32,18 +35,13 @@ import {
 
 export const appState = new State();
 
-// удаление пользователя реализовал, надо сделать изменение иконки пользователя в зависимости
-// от попап окна, открыто/закрыто, а так же реализовать попап окно на иконку пользователя
-// и на бургер меню, а точнее подумать нужно ли оно вообще
-// бургер меню, да и сам список в ПН не нужен, модифицировать
-
 // назначение модального окна (МО) добавления задачи
 const modalWindow = new Modal(document.querySelector("#staticBackdrop"));
 
 // модальное окно добавления задачи как элемент
 const modalWindowElement = document.querySelector("#staticBackdrop");
 
-// кнопки в МО
+// кнопки в МО добавления задач
 const taskAddOkBtn = document.querySelector(".app-button-input"); // кнопка Add
 const taskEditOkBtn = document.querySelector(".app-button-input-taskedit"); // кнопка Apply
 const deleteTaskBtn = document.querySelector(".app-button-task-delete"); // кнопка Delete task
@@ -65,11 +63,20 @@ const content = document.querySelector("#content"); // для вставлени
 const footer = document.querySelector("#footer"); // футер
 const modalWindowLabel = document.querySelector("#staticBackdropLabel"); // заголовок МО добавления задач
 const inputTask = document.querySelector(".app-input-task"); // input в МО добавления задач
-const inputTaskLabel = document.querySelector(".app-input-task-label"); // надпись над input в МО
-const inputUser = document.querySelector("#input-user"); // всплывающий список в МО
-const inputUserLabel = document.querySelector(".app-input-user-label"); // надпись над всплывающим списком в МО
-const inputUserForm = document.querySelector("#input-user-form"); // обёртка всплывающего списка
-const popup = document.querySelector(".app-popup"); // popup меню
+const inputTaskLabel = document.querySelector(".app-input-task-label"); // надпись над input в МО добавления задач
+const inputUser = document.querySelector("#input-user"); // всплывающий список в МО добавления задач
+const inputUserLabel = document.querySelector(".app-input-user-label"); // надпись над всплывающим списком в МО добавления задач
+const inputUserForm = document.querySelector("#input-user-form"); // обёртка всплывающего списка в МО добавления задач
+
+const popupBg = document.querySelector(".app-popup-bg"); // бэкграунд popup меню пользователя
+const popup = document.querySelector(".app-popup"); // popup меню меню пользователя
+const myTasks = document.querySelector("#app-tasks-btn"); // пункт меню задачи
+const menu1 = document.querySelector("#app-menu1-btn"); // пункт меню 1
+const menu2 = document.querySelector("#app-menu2-btn"); // пункт меню 2
+const addUser = document.querySelector("#app-adduser-btn"); // пункт меню добавления нового пользователя
+const deleteUser = document.querySelector("#app-deleteuser-btn"); // пункт меню удаления пользователя
+const account = document.querySelector("#app-account-btn"); // пункт меню аккаунт
+const logout = document.querySelector("#app-logout-btn"); // пункт меню выход
 
 // input в МО создания нового пользователя
 const inputLogin = document.querySelector(".app-input-login");
@@ -84,7 +91,7 @@ localStorage.clear();
 generateTestUser(User);
 generateAdmin(Admin);
 
-document.addEventListener("DOMContentLoaded", startApp); // после загрузки DOM запускается функция
+document.addEventListener("DOMContentLoaded", startApp); // после загрузки DOM запускается приложение
 modalWindowElement.addEventListener("hidden.bs.modal", handlerDefault); // слушатель на скрытие МО
 
 let taskId = ""; // переменная для хранения id задачи
@@ -92,12 +99,32 @@ let taskId = ""; // переменная для хранения id задачи
 // запускает приложение, отображает необходимые элементы, осуществляет основную функциональность приложения
 function startApp() {
   navbar.innerHTML = navbarNotAuthTemplate; // в ПН отображается не авторизованный шаблон
-  footer.innerHTML = footerNotAuth; // в футер отображается не авторизованный шаблон
+  footer.innerHTML = footerNotAuthTemplate; // в футер отображается не авторизованный шаблон
   let username = document.querySelector("#username"); // поле вывода имя пользователя
   username.innerHTML = `Kanban board, ${new Date().getFullYear()}`; // выводим текущий год
-  const loginForm = document.querySelector("#app-login-form"); // форма входа
 
-  loginForm.addEventListener("submit", handlerForm); // прослушка на submit
+  // находим и сохраняем в переменные DOM элементов
+  const popupAuth = document.querySelector(".app-popup-auth"); // popup обёртка формы входа mini
+  const loginForm = document.querySelector("#app-login-form"); // форма входа
+  const loginFormMini = document.querySelector("#app-login-form-mini"); // форма входа mini
+  const burgerClose = document.querySelector(".navbar-toggler"); // бургер в ПН, форма входа закрыта
+  const burgerOpen = document.querySelector(".navbar-toggler-open"); // бургер в ПН, форма входа открыта
+
+  // прослушка бургер меню
+  burgerClose.addEventListener("click", handlerBurger);
+  burgerOpen.addEventListener("click", handlerBurger);
+
+  // прослушка формы входа на submit
+  loginForm.addEventListener("submit", handlerForm); // обычная форма
+  loginFormMini.addEventListener("submit", handlerForm); // мини форма в popup
+
+  // срабатывает при клике по burger меню
+  function handlerBurger() {
+    popupAuth.classList.toggle("invisible");
+    burgerClose.classList.toggle("invisible");
+    burgerOpen.classList.toggle("invisible");
+  }
+  // ...
 
   // срабатывает при попытке логина
   function handlerForm(e) {
@@ -105,13 +132,27 @@ function startApp() {
 
     // передача данных из инпутов логина и пароля в переменные
     const formData = new FormData(loginForm);
-    const login = formData.get("login");
-    const password = formData.get("password");
+    let login = formData.get("login");
+    let password = formData.get("password");
+
+    // передача данных из инпутов логина и пароля mini в переменные
+    const formDataMini = new FormData(loginFormMini);
+    const loginMini = formDataMini.get("login");
+    const passwordMini = formDataMini.get("password");
+
+    // если есть информация в инпутах формы мини, то передаём её
+    // в обычные переменный, которые будут использоватся для
+    // проверки авторизации
+    if (loginMini && passwordMini) {
+      login = loginMini;
+      password = passwordMini;
+    }
+    // ...
 
     // если логин или пароль пустой выводит alert
     if (!login || !password) {
-      modalAlert.show();
       alertMessage.innerHTML = "Input login and password";
+      modalAlert.show();
       return;
     }
     // ...
@@ -121,13 +162,13 @@ function startApp() {
     // присвоить переменной соответствующий шаблон основного содержания в зависимости от результата авторизации
     let fieldHTMLContent = auth
       ? taskFieldTemplate
-      : "<h2>Please Sign In to see your tasks!</h2>";
+      : '<h2 class="app-auth-message">Please Sign In to see your tasks!</h2>';
 
     // присвоить переменной шаблон НП в зависимости от результата авторизации
     let navbarContent = auth ? navbarAuthTemplate : navbarNotAuthTemplate;
 
     // присвоить переменной шаблон футера в зависимости от результата авторизации
-    let footerContent = auth ? footerAuth : footerNotAuth;
+    let footerContent = auth ? footerAuthTemplate : footerNotAuthTemplate;
 
     // передача шаблонов из переменных в DOM приложения
     content.innerHTML = fieldHTMLContent;
@@ -136,9 +177,9 @@ function startApp() {
 
     // если авторизация не состоялась выводим alert
     if (!auth) {
-      modalAlert.show();
       alertMessage.innerHTML = "Login or password incorrect, please try again";
-      loginForm.removeEventListener("submit", handlerForm); // удаляем прослушку
+      modalAlert.show();
+      loginForm.removeEventListener("submit", handlerForm); // удаляем прослушку, иначе наложится
       return startApp(); // прерываем и запускаем заново работу приложения
     }
     // ...
@@ -157,36 +198,31 @@ function startApp() {
     const avatar = document.querySelector(".app-avatar"); // иконки пользователя (userMenuClose и userMenuOpen)
     const userMenuClose = document.querySelector("#user-menu-close"); // иконка пользователя при закрытом меню
     const userMenuOpen = document.querySelector("#user-menu-open"); // иконка пользователя при открытом меню
-    const logoutBtn = document.querySelector("#app-logout-btn"); // кнопка выхода
-    const addUserBtn = document.querySelector("#app-adduser-btn"); // кнопка добавления нового пользователя
-    const deleteUserBtn = document.querySelector("#app-deleteuser-btn"); // кнопка удаления пользователя
 
     // выставляем статус иконки по умолчанию (меню закрыто)
     userMenuClose.classList.remove("invisible");
     userMenuOpen.classList.add("invisible");
 
-    // кнопки добавления задач в полях статусов
-    const backlogAddTaskBtn = document.querySelector("#backlog-addtask-btn");
-    const readyAddTaskBtn = document.querySelector("#ready-addtask-btn");
-    const inProgAddTaskBtn = document.querySelector("#inprogress-addtask-btn");
-    const finishedAddTaskBtn = document.querySelector("#finished-addtask-btn");
+    // объявление переменных для хранения DOM элементов полей задач
+    let backlogAddTaskBtn,
+      readyAddTaskBtn,
+      inProgAddTaskBtn,
+      finishedAddTaskBtn,
+      backlog,
+      ready,
+      inprogress,
+      finished,
+      tasksColumns;
 
-    // поля статусов задач
-    const backlog = document.querySelector(".app-backlog");
-    const ready = document.querySelector(".app-ready");
-    const inprogress = document.querySelector(".app-inprogress");
-    const finished = document.querySelector(".app-finished");
-
-    // сохраняем список полей статусов задач в массив
-    const tasksColumns = [backlog, ready, inprogress, finished];
+    tasksFieldInit(); // инициализация полей задач
 
     // если пользователь админ отображает необходимую информацию
     if (isCurrentUserAdmin()) {
-      addUserBtn.classList.remove("invisible");
-      deleteUserBtn.classList.remove("invisible");
+      addUser.classList.remove("invisible");
+      deleteUser.classList.remove("invisible");
     } else {
-      addUserBtn.classList.add("invisible");
-      deleteUserBtn.classList.add("invisible");
+      addUser.classList.add("invisible");
+      deleteUser.classList.add("invisible");
     }
     // ...
 
@@ -194,25 +230,159 @@ function startApp() {
     updBtnStatus(tasksColumns); // обновляем статусы кнопок
 
     // добавляем прослушку
-    avatar.addEventListener("click", handlerAvatar); // иконки пользователя
-    addUserBtn.addEventListener("click", handlerAddUser); // кнопка добавления пользователя
-    deleteUserBtn.addEventListener("click", handlerDeleteUser); // кнопка удаления пользователя
-    logoutBtn.addEventListener("click", handlerLogout); // кнопка выхода
+    avatar.addEventListener("click", handlerAvatar); // иконки пользователя (отображает popup меню пользователя)
+    popupBg.addEventListener("click", handlerAvatar); // бэкграунд popup меню пользователя
+    myTasks.addEventListener("click", handlerMyTasks); // пункт меню My tasks
+    menu1.addEventListener("click", handlerMenu1); // пункт меню Menu 1
+    menu2.addEventListener("click", handlerMenu2); // пункт меню Menu 2
+    addUser.addEventListener("click", handlerAddUser); // пункт меню добавления пользователя
+    deleteUser.addEventListener("click", handlerDeleteUser); // пункт меню удаления пользователя
+    account.addEventListener("click", handlerAccount); // пункт меню My account
+    logout.addEventListener("click", handlerLogout); // пункт меню выход
     backlogAddTaskBtn.addEventListener("click", handlerAddTask); // кнопка добавить задачу в поле backlog
     readyAddTaskBtn.addEventListener("click", handlerMoveTask); // кнопка добавить задачу в поле ready
     inProgAddTaskBtn.addEventListener("click", handlerMoveTask); // кнопка добавить задачу в поле inprogress
     finishedAddTaskBtn.addEventListener("click", handlerMoveTask); // кнопка добавить задачу в поле finished
-    taskAddOkBtn.addEventListener("click", handlerTaskOkBtn); // кнопка Add в МО
+    taskAddOkBtn.addEventListener("click", handlerTaskOkBtn); // кнопка Add в МО добавления задач
     taskEditOkBtn.addEventListener("click", handlerTaskEditOkBtn); // кнопка Apply в МО
     deleteTaskBtn.addEventListener("click", handlerDeleteTaskBtn); // кнопка Delete в МО
-    taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn); // слушатель на кнопку AddUser
+    taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn); // кнопка Apply в МО добавления пользователя
+
+    // инициализирует поля статусов
+    function tasksFieldInit() {
+      // кнопки добавления задач в полях статусов
+      backlogAddTaskBtn = document.querySelector("#backlog-addtask-btn");
+      readyAddTaskBtn = document.querySelector("#ready-addtask-btn");
+      inProgAddTaskBtn = document.querySelector("#inprogress-addtask-btn");
+      finishedAddTaskBtn = document.querySelector("#finished-addtask-btn");
+
+      // поля статусов задач
+      backlog = document.querySelector(".app-backlog");
+      ready = document.querySelector(".app-ready");
+      inprogress = document.querySelector(".app-inprogress");
+      finished = document.querySelector(".app-finished");
+
+      // сохраняем список DOM полей статусов задач в массив
+      tasksColumns = [backlog, ready, inprogress, finished];
+    }
+    // ...
 
     // переключает вид иконки пользователя
     function handlerAvatar() {
       userMenuClose.classList.toggle("invisible");
       userMenuOpen.classList.toggle("invisible");
+      popupBg.classList.toggle("invisible");
       popup.classList.toggle("invisible");
-      console.log("переключение");
+    }
+    // ...
+
+    // отображает задачи пользователя
+    function handlerMyTasks() {
+      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
+
+      content.innerHTML = fieldHTMLContent; // отображаем поля задач
+
+      tasksFieldInit(); // // инициализация полей задач
+
+      // добавляем прослушку
+      backlogAddTaskBtn.addEventListener("click", handlerAddTask); // кнопка добавить задачу в поле backlog
+      readyAddTaskBtn.addEventListener("click", handlerMoveTask); // кнопка добавить задачу в поле ready
+      inProgAddTaskBtn.addEventListener("click", handlerMoveTask); // кнопка добавить задачу в поле inprogress
+      finishedAddTaskBtn.addEventListener("click", handlerMoveTask); // кнопка добавить задачу в поле finished
+
+      displayTasks(tasksColumns, currentUser, handlerTaskEdit); // отображаем задачи
+      updBtnStatus(tasksColumns); // обновляем статусы кнопок
+    }
+    // ...
+
+    // отображает шаблон меню 1
+    function handlerMenu1() {
+      content.innerHTML = menu1Template; // отображаем в основном содержании шаблон меню 1
+      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
+    }
+    // ...
+
+    // отображает шаблон меню 2
+    function handlerMenu2() {
+      content.innerHTML = menu2Template; // отображаем в основном содержании шаблон меню 2
+      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
+    }
+    // ...
+
+    // срабатывает при нажатии на кнопку добавления нового пользователя, отображает МО
+    function handlerAddUser() {
+      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
+
+      modalWindowAddUser.show();
+    }
+    // ...
+
+    // срабатывает при нажатии на кнопку удаления пользователя, отображает МО
+    function handlerDeleteUser() {
+      applyBtnFlag = "DeleteUser"; // установка флага
+
+      handlerMyTasks(); // отображаем задачи
+
+      // настраиваем отображение элементов МО
+      taskEditOkBtn.classList.remove("invisible"); // кнопка Apply отображаем
+      taskAddOkBtn.classList.add("invisible"); // кнопка Add скрываем
+      inputTask.classList.add("invisible"); // input в МО добавления задач скрываем
+      inputTaskLabel.classList.add("invisible"); // надпись над input скрываем
+      inputUserForm.classList.remove("invisible"); // всплывающий список отображаем
+      modalWindowLabel.innerHTML = "Delete user"; // заголовок МО добавления задач
+      inputUserLabel.innerHTML = "Select a user"; // меняем надпись над всплывающим списком
+
+      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
+
+      updUserList(); // обновляем список пользователей во всплывающем меню
+
+      // если в localstorge нет ни одного пользователя выводим алерт
+      // и прерываем выполнение функции
+      const users = getFromStorage("users");
+      if (!users.length) {
+        alertMessage.innerHTML = "There are no users to delete";
+        modalAlert.show();
+        return;
+      }
+
+      modalWindow.show(); // отображаем МО
+    }
+    // ...
+
+    // отображает шаблон аккаунт
+    function handlerAccount() {
+      content.innerHTML = myAccountTemplate; // отображаем в основном содержании шаблон меню 2
+      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
     }
     // ...
 
@@ -269,7 +439,7 @@ function startApp() {
     }
     // ...
 
-    // срабатывает при нажатии на кнопку Delete
+    // срабатывает при нажатии на кнопку Delete при редактировании задачи
     function handlerDeleteTaskBtn() {
       deleteFromStorage("tasks", taskId);
       displayTasks(tasksColumns, currentUser, handlerTaskEdit);
@@ -282,57 +452,27 @@ function startApp() {
     }
     // ...
 
-    // срабатывает при нажатии на кнопку добавления нового пользователя, отображает МО
-    function handlerAddUser() {
-      popup.classList.add("invisible"); // скрываем popup
-
-      // отображаем закрытую иконку
-      userMenuClose.classList.remove("invisible");
-      userMenuOpen.classList.add("invisible");
-
-      modalWindowAddUser.show();
-    }
-    // ...
-
-    // срабатывает при нажатии на кнопку удаления пользователя, отображает МО
-    function handlerDeleteUser() {
-      applyBtnFlag = "DeleteUser"; // установка флага
-
-      // настраиваем отображение элементов МО
-      taskEditOkBtn.classList.remove("invisible"); // кнопка Apply отображаем
-      taskAddOkBtn.classList.add("invisible"); // кнопка Add скрываем
-      inputTask.classList.add("invisible"); // input в МО добавления задач скрываем
-      inputTaskLabel.classList.add("invisible"); // надпись над input скрываем
-      inputUserForm.classList.remove("invisible"); // всплывающий список отображаем
-      modalWindowLabel.innerHTML = "Delete user"; // заголовок МО добавления задач
-      inputUserLabel.innerHTML = "Select a user"; // меняем надпись над всплывающим списком
-
-      popup.classList.add("invisible"); // скрываем popup
-
-      // отображаем закрытую иконку
-      userMenuClose.classList.remove("invisible");
-      userMenuOpen.classList.add("invisible");
-
-      updUserList();
-      modalWindow.show(); // отображаем МО
-    }
-    // ...
-
-    // срабатывает при нажатии на кнопку выход
+    // срабатывает при нажатии на пункт меню выход
     function handlerLogout() {
       // сброс основного содержания и текущего пользователя
-      content.innerHTML = "<h2>Please Sign In to see your tasks!</h2>";
+      content.innerHTML =
+        '<h2 class="app-auth-message">Please Sign In to see your tasks!</h2>';
       appState.currentUser = null;
 
       // удаление слушателей которые останутся после выхода и повесятся ещё раз при перезапуске startApp
       taskAddOkBtn.removeEventListener("click", handlerTaskOkBtn);
       taskEditOkBtn.removeEventListener("click", handlerTaskEditOkBtn);
+      myTasks.removeEventListener("click", handlerMyTasks);
+      menu1.removeEventListener("click", handlerMenu1);
       deleteTaskBtn.removeEventListener("click", handlerDeleteTaskBtn);
-      addUserBtn.removeEventListener("click", handlerAddUser);
+      addUser.removeEventListener("click", handlerAddUser);
+      deleteUser.removeEventListener("click", handlerDeleteUser);
+      logout.removeEventListener("click", handlerLogout);
       taskInputAddUserBtn.removeEventListener("click", handlerAddUserOkBtn);
 
       taskId = ""; // сброс id
-      applyBtnFlag = "TaskEdit"; // сброс флага для функционала кнопки Apply в МО задачи
+      applyBtnFlag = "TaskEdit"; // сброс флага для функционала кнопки Apply в МО добавления задач
+      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
       popup.classList.add("invisible"); // скрываем popup
 
       return startApp(); // перезапуск приложения
@@ -352,11 +492,11 @@ function startApp() {
     }
     // ...
 
-    // срабатывает при нажатии на кнопку Add
+    // срабатывает при нажатии на кнопку Add в МО добавления задач
     function handlerTaskOkBtn() {
       if (!inputTask.value) return; // если инпут пустой ничего не происходит
 
-      // если админ создаёт задачу для выбранного пользователя, иначе для залогиненого
+      // если админ, то создаём задачу для выбранного пользователя, иначе для залогиненого
       if (currentUser == "admin") {
         const task = new Task(inputTask.value, inputUser.value);
         Task.save(task);
@@ -401,6 +541,7 @@ function startApp() {
 
     // срабатывает при нажатии кнопки добавления нового пользователя
     function handlerAddUserOkBtn() {
+      handlerMyTasks();
       // передача данных из инпутов в переменные
       const login = inputLogin.value,
         pass1 = inputPass1.value,
@@ -408,16 +549,16 @@ function startApp() {
 
       // если какой-то инпут пустой отображает alert
       if (!login || !pass1 || !pass2) {
-        modalAlert.show();
         alertMessage.innerHTML = "All fields are required";
+        modalAlert.show();
         return;
       }
       // ...
 
       // если имя пользователя содержит admin отображает alert
       if (login.match(/admin/gi)) {
-        modalAlert.show();
         alertMessage.innerHTML = "This name cannot be used";
+        modalAlert.show();
         return;
       }
 
@@ -426,18 +567,18 @@ function startApp() {
       // иначе выводит alert
       else if (isTheLoginFree(login)) {
         if (pass1 == pass2) {
-          addUser(User, login, pass1);
+          addNewUser(User, login, pass1);
         } else {
-          modalAlert.show();
           alertMessage.innerHTML = "Password not confirmed";
+          modalAlert.show();
           return;
         }
       }
 
       // иначе выводит alert
       else {
-        modalAlert.show();
         alertMessage.innerHTML = "That login already exists";
+        modalAlert.show();
         return;
       }
       // ...

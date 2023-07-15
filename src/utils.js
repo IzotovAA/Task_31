@@ -34,7 +34,7 @@ export const generateAdmin = function (Admin) {
 // ...
 
 // добавляет нового пользователя, , аргументы: класс User, имя, пароль
-export const addUser = function (User, login, password) {
+export const addNewUser = function (User, login, password) {
   const user = new User(login, password);
   User.save(user);
 };
@@ -186,8 +186,8 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
 
     // обновляем количество задач в footer
     // активные - поле inprogress, законченные - поле finished
-    displayFooterTasksStatus(taskFieldList[2], taskFieldList[3]);
-  } else displayFooterTasksStatus(taskFieldList[2], taskFieldList[3]);
+    displayFooterTasksStatus(taskFieldList[0], taskFieldList[3]);
+  } else displayFooterTasksStatus(taskFieldList[0], taskFieldList[3]);
 };
 // ...
 
@@ -210,7 +210,7 @@ export const updUserList = function () {
     for (const user of users) {
       userListContainer.insertAdjacentHTML(
         "beforeend",
-        `<option value="${user.login}">${user.login}</option>`
+        `<option class="input-user__item" value="${user.login}">${user.login}</option>`
       );
     }
   }
@@ -255,7 +255,7 @@ export const updTasksList = function (field) {
         if (user == "admin" || task.own == user) {
           taskListContainer.insertAdjacentHTML(
             "beforeend",
-            `<option value="${task.id}">${task.name}</option>`
+            `<option class="input-user__item" value="${task.id}">${task.name}</option>`
           );
         }
       }

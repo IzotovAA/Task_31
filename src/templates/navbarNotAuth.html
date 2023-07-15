@@ -1,5 +1,10 @@
-<div class="container-fluid">
-  <h4 class="app-navbar-brand">Kanban Board</h4>
+<div class="container-fluid app-navbar">
+  <h4 class="app-navbar-brand-mini">Kanban Board</h4>
+  <div></div>
+  <div class="navbar-toggler-open invisible">
+    <span class="closed-1"></span>
+    <span class="closed-2"></span>
+  </div>
   <button
     class="navbar-toggler"
     type="button"
@@ -13,9 +18,9 @@
   </button>
   <div class="collapse navbar-collapse" id="navbarSupportedContent">
     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-      <li class="nav-item">
+      <!-- <li class="nav-item">
         <h5 class="app-navbar-brand" id="greetings"></h5>
-      </li>
+      </li> -->
     </ul>
     <form id="app-login-form" class="d-flex">
       <input
@@ -35,6 +40,35 @@
         aria-label="Password"
       />
       <button id="app-login-btn" class="btn btn-outline-info" type="submit">
+        Sign In
+      </button>
+    </form>
+  </div>
+
+  <!-- popup форма логина -->
+  <div class="app-popup-auth invisible">
+    <form id="app-login-form-mini" class="d-flex">
+      <input
+        class="form-control me-2 app-popup-auth__item"
+        name="login"
+        autocomplete="username"
+        type="text"
+        placeholder="Login"
+        aria-label="Login"
+      />
+      <input
+        class="form-control me-2 app-popup-auth__item"
+        name="password"
+        autocomplete="current-password"
+        type="password"
+        placeholder="Password"
+        aria-label="Password"
+      />
+      <button
+        id="app-login-btn-mini"
+        class="btn btn-outline-info app-popup-auth__item"
+        type="submit"
+      >
         Sign In
       </button>
     </form>

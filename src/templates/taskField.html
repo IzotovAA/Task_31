@@ -1,28 +1,35 @@
 <div class="container-fluid d-flex justify-content-around app-task">
   <div class="app-column">
-    <h4>Backlog</h4>
-    <ul class="app-task-column app-backlog">
-      <!-- <ul class="app-task__user">
-        ${task.own}:
-        <li class="app-task__item">${task.name}</li>
-      </ul> -->
-    </ul>
+    <h4 class="app-field-label">Backlog</h4>
+    <div class="app-task-container">
+      <ul class="app-task-column app-backlog">
+        <!-- <ul class="app-task__user">
+          ${task.own}:
+          <li class="app-task__item">${task.name}</li>
+        </ul> -->
+      </ul>
+    </div>
+
     <button class="btn btn-light" id="backlog-addtask-btn" type="button">
       + Add Task
     </button>
   </div>
 
   <div class="app-column">
-    <h4>Ready</h4>
-    <ul class="app-task-column app-ready"></ul>
+    <h4 class="app-field-label">Ready</h4>
+    <div class="app-task-container">
+      <ul class="app-task-column app-ready"></ul>
+    </div>
     <button class="btn btn-light" id="ready-addtask-btn" type="button" disabled>
       + Add Task
     </button>
   </div>
 
   <div class="app-column">
-    <h4>In Progress</h4>
-    <ul class="app-task-column app-inprogress"></ul>
+    <h4 class="app-field-label">In Progress</h4>
+    <div class="app-task-container">
+      <ul class="app-task-column app-inprogress"></ul>
+    </div>
     <button
       class="btn btn-light"
       id="inprogress-addtask-btn"
@@ -34,8 +41,10 @@
   </div>
 
   <div class="app-column">
-    <h4>Finished</h4>
-    <ul class="app-task-column app-finished"></ul>
+    <h4 class="app-field-label">Finished</h4>
+    <div class="app-task-container">
+      <ul class="app-task-column app-finished"></ul>
+    </div>
     <button
       class="btn btn-light"
       id="finished-addtask-btn"
