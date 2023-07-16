@@ -68,6 +68,7 @@
 
 #app-login-btn {
   width: 160px;
+  margin: 0 10px !important;
 }
 
 .app-task {
