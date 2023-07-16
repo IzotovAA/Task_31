@@ -2,12 +2,10 @@
 
 import { BaseModel } from "./BaseModel";
 import { addToStorage } from "../utils";
-import { appState } from "../app";
 
 export class Task extends BaseModel {
   constructor(taskName, taskOwn) {
     super();
-    // this.own = appState.currentUser.login;
     this.own = taskOwn;
     this.name = taskName;
     this.location = "backlog";

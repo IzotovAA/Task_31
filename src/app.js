@@ -33,7 +33,7 @@ import {
   userIdByName,
 } from "./utils";
 
-export const appState = new State();
+export const appState = new State(); // хранение залогиненого пользователя
 
 // назначение модального окна (МО) добавления задачи
 const modalWindow = new Modal(document.querySelector("#staticBackdrop"));
@@ -67,7 +67,6 @@ const inputTaskLabel = document.querySelector(".app-input-task-label"); // на�
 const inputUser = document.querySelector("#input-user"); // всплывающий список в МО добавления задач
 const inputUserLabel = document.querySelector(".app-input-user-label"); // надпись над всплывающим списком в МО добавления задач
 const inputUserForm = document.querySelector("#input-user-form"); // обёртка всплывающего списка в МО добавления задач
-
 const popupBg = document.querySelector(".app-popup-bg"); // бэкграунд popup меню пользователя
 const popup = document.querySelector(".app-popup"); // popup меню меню пользователя
 const myTasks = document.querySelector("#app-tasks-btn"); // пункт меню задачи
@@ -87,7 +86,7 @@ const alertMessage = document.querySelector("#alert-message"); // поле со�
 
 let applyBtnFlag = "TaskEdit"; // флаг для функционала кнопки Apply в МО задачи
 
-localStorage.clear();
+localStorage.clear(); // очистка локального хранилища
 generateTestUser(User);
 generateAdmin(Admin);
 
@@ -267,6 +266,17 @@ function startApp() {
     }
     // ...
 
+    // скрывает попап меню пользователя, меняет вид иконки на закрытую
+    function closePopupUserMenu() {
+      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
+      popup.classList.add("invisible"); // скрываем popup
+
+      // отображаем закрытую иконку
+      userMenuClose.classList.remove("invisible");
+      userMenuOpen.classList.add("invisible");
+    }
+    // ...
+
     // переключает вид иконки пользователя
     function handlerAvatar() {
       userMenuClose.classList.toggle("invisible");
@@ -278,12 +288,7 @@ function startApp() {
 
     // отображает задачи пользователя
     function handlerMyTasks() {
-      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
-      popup.classList.add("invisible"); // скрываем popup
-
-      // отображаем закрытую иконку
-      userMenuClose.classList.remove("invisible");
-      userMenuOpen.classList.add("invisible");
+      closePopupUserMenu();
 
       content.innerHTML = fieldHTMLContent; // отображаем поля задач
 
@@ -303,35 +308,20 @@ function startApp() {
     // отображает шаблон меню 1
     function handlerMenu1() {
       content.innerHTML = menu1Template; // отображаем в основном содержании шаблон меню 1
-      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
-      popup.classList.add("invisible"); // скрываем popup
-
-      // отображаем закрытую иконку
-      userMenuClose.classList.remove("invisible");
-      userMenuOpen.classList.add("invisible");
+      closePopupUserMenu();
     }
     // ...
 
     // отображает шаблон меню 2
     function handlerMenu2() {
       content.innerHTML = menu2Template; // отображаем в основном содержании шаблон меню 2
-      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
-      popup.classList.add("invisible"); // скрываем popup
-
-      // отображаем закрытую иконку
-      userMenuClose.classList.remove("invisible");
-      userMenuOpen.classList.add("invisible");
+      closePopupUserMenu();
     }
     // ...
 
     // срабатывает при нажатии на кнопку добавления нового пользователя, отображает МО
     function handlerAddUser() {
-      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
-      popup.classList.add("invisible"); // скрываем popup
-
-      // отображаем закрытую иконку
-      userMenuClose.classList.remove("invisible");
-      userMenuOpen.classList.add("invisible");
+      closePopupUserMenu();
 
       modalWindowAddUser.show();
     }
@@ -352,12 +342,7 @@ function startApp() {
       modalWindowLabel.innerHTML = "Delete user"; // заголовок МО добавления задач
       inputUserLabel.innerHTML = "Select a user"; // меняем надпись над всплывающим списком
 
-      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
-      popup.classList.add("invisible"); // скрываем popup
-
-      // отображаем закрытую иконку
-      userMenuClose.classList.remove("invisible");
-      userMenuOpen.classList.add("invisible");
+      closePopupUserMenu();
 
       updUserList(); // обновляем список пользователей во всплывающем меню
 
@@ -369,6 +354,7 @@ function startApp() {
         modalAlert.show();
         return;
       }
+      // ...
 
       modalWindow.show(); // отображаем МО
     }
@@ -377,78 +363,7 @@ function startApp() {
     // отображает шаблон аккаунт
     function handlerAccount() {
       content.innerHTML = myAccountTemplate; // отображаем в основном содержании шаблон меню 2
-      popupBg.classList.add("invisible"); // скрываем бэкграунд popup
-      popup.classList.add("invisible"); // скрываем popup
-
-      // отображаем закрытую иконку
-      userMenuClose.classList.remove("invisible");
-      userMenuOpen.classList.add("invisible");
-    }
-    // ...
-
-    // отображает МО с необходимой информацией при нажатии на задачу
-    function handlerTaskEdit(e) {
-      applyBtnFlag = "TaskEdit"; // установка флага для использования МО для редактирования задачи
-      inputUserForm.classList.add("invisible"); // скрываем всплывающий список
-      inputTask.value = this.innerHTML; // отображаем в инпуте название текущей задачи
-      taskEditOkBtn.classList.remove("invisible"); // отображаем кнопку Apply
-      taskAddOkBtn.classList.add("invisible"); // скрываем кнопку Add
-      taskId = e.target.id; // сохраняем id редактируемой задачи
-      // если админ, отображаем кнопку Delete
-      if (currentUser == "admin") deleteTaskBtn.classList.remove("invisible");
-
-      modalWindow.show(); // отображаем МО
-    }
-    // ...
-
-    // срабатывае при нажатии на кнопку Apply в МО
-    function handlerTaskEditOkBtn() {
-      // в зависимости от флага редактирует либо переносит задачу в следующую стадию
-      // либо удаляет выбранного пользователя
-      if (applyBtnFlag == "TaskEdit") {
-        editInStorage("tasks", taskId, "name", inputTask.value);
-        taskId = "";
-      } else if (applyBtnFlag == "MoveTask") {
-        moveToNextStage(inputUser.value);
-      } else if (applyBtnFlag == "DeleteUser") {
-        // удаляем пользователя и далее все задачи принадлежащие ему
-        deleteFromStorage("users", userIdByName(inputUser.value));
-        const storageData = getFromStorage("tasks");
-        if (storageData.length) {
-          storageData.forEach((task) => {
-            if (task.own == inputUser.value) {
-              deleteFromStorage("tasks", task.id);
-            }
-          });
-        }
-      }
-
-      modalWindow.hide(); // скрываем МО
-
-      // выставление состояния элементов по умолчанию
-      deleteTaskBtn.classList.add("invisible"); // кнопка удаления задачи
-      taskEditOkBtn.classList.add("invisible"); // кнопка Apply
-      taskAddOkBtn.classList.remove("invisible"); // кнопка Add
-      inputTask.classList.remove("invisible"); // input в МО добавления задач
-      inputTaskLabel.classList.remove("invisible"); // надпись над input в МО
-      modalWindowLabel.innerHTML = "Input task name"; // заголовок МО добавления задач
-      inputUserForm.classList.add("invisible"); // всплывающий список
-
-      displayTasks(tasksColumns, currentUser, handlerTaskEdit);
-      updBtnStatus(tasksColumns);
-    }
-    // ...
-
-    // срабатывает при нажатии на кнопку Delete при редактировании задачи
-    function handlerDeleteTaskBtn() {
-      deleteFromStorage("tasks", taskId);
-      displayTasks(tasksColumns, currentUser, handlerTaskEdit);
-      updBtnStatus(tasksColumns);
-      modalWindow.hide(); // скрываем МО
-
-      deleteTaskBtn.classList.add("invisible"); // скрываем Delete
-      taskEditOkBtn.classList.add("invisible"); // скрываем Apply
-      taskAddOkBtn.classList.remove("invisible"); // отображаем Add
+      closePopupUserMenu();
     }
     // ...
 
@@ -462,11 +377,14 @@ function startApp() {
       // удаление слушателей которые останутся после выхода и повесятся ещё раз при перезапуске startApp
       taskAddOkBtn.removeEventListener("click", handlerTaskOkBtn);
       taskEditOkBtn.removeEventListener("click", handlerTaskEditOkBtn);
+      popupBg.removeEventListener("click", handlerAvatar);
       myTasks.removeEventListener("click", handlerMyTasks);
       menu1.removeEventListener("click", handlerMenu1);
+      menu2.removeEventListener("click", handlerMenu2);
       deleteTaskBtn.removeEventListener("click", handlerDeleteTaskBtn);
       addUser.removeEventListener("click", handlerAddUser);
       deleteUser.removeEventListener("click", handlerDeleteUser);
+      account.removeEventListener("click", handlerAccount);
       logout.removeEventListener("click", handlerLogout);
       taskInputAddUserBtn.removeEventListener("click", handlerAddUserOkBtn);
 
@@ -487,27 +405,9 @@ function startApp() {
       } else {
         inputUserForm.classList.add("invisible");
       }
+      // ...
 
       modalWindow.show(); // отображаем МО
-    }
-    // ...
-
-    // срабатывает при нажатии на кнопку Add в МО добавления задач
-    function handlerTaskOkBtn() {
-      if (!inputTask.value) return; // если инпут пустой ничего не происходит
-
-      // если админ, то создаём задачу для выбранного пользователя, иначе для залогиненого
-      if (currentUser == "admin") {
-        const task = new Task(inputTask.value, inputUser.value);
-        Task.save(task);
-      } else {
-        const task = new Task(inputTask.value, login);
-        Task.save(task);
-      }
-
-      displayTasks(tasksColumns, login, handlerTaskEdit);
-      updBtnStatus(tasksColumns);
-      modalWindow.hide();
     }
     // ...
 
@@ -533,21 +433,104 @@ function startApp() {
           break;
         }
       }
+      // ...
 
       inputUserForm.classList.remove("invisible"); // отобразить всплывающий список
       modalWindow.show();
     }
     // ...
 
+    // срабатывает при нажатии на кнопку Add в МО добавления задач
+    function handlerTaskOkBtn() {
+      if (!inputTask.value) return; // если инпут пустой ничего не происходит
+
+      // если админ, то создаём задачу для выбранного пользователя, иначе для залогиненого
+      if (currentUser == "admin") {
+        const task = new Task(inputTask.value, inputUser.value);
+        Task.save(task);
+      } else {
+        const task = new Task(inputTask.value, login);
+        Task.save(task);
+      }
+      // ...
+
+      displayTasks(tasksColumns, login, handlerTaskEdit);
+      updBtnStatus(tasksColumns);
+      modalWindow.hide();
+    }
+    // ...
+
+    // срабатывае при нажатии на кнопку Apply в МО
+    function handlerTaskEditOkBtn() {
+      // в зависимости от флага редактирует либо переносит задачу в следующую стадию
+      // либо удаляет выбранного пользователя
+      if (applyBtnFlag == "TaskEdit") {
+        editInStorage("tasks", taskId, "name", inputTask.value);
+        taskId = "";
+      } else if (applyBtnFlag == "MoveTask") {
+        moveToNextStage(inputUser.value);
+      } else if (applyBtnFlag == "DeleteUser") {
+        // удаляем пользователя и далее все задачи принадлежащие ему
+        deleteFromStorage("users", userIdByName(inputUser.value));
+        const storageData = getFromStorage("tasks");
+        if (storageData.length) {
+          storageData.forEach((task) => {
+            if (task.own == inputUser.value) {
+              deleteFromStorage("tasks", task.id);
+            }
+          });
+        }
+      }
+      // ...
+
+      modalWindow.hide(); // скрываем МО
+
+      handlerDefault(); // выставление состояния элементов по умолчанию
+
+      displayTasks(tasksColumns, currentUser, handlerTaskEdit);
+      updBtnStatus(tasksColumns);
+    }
+    // ...
+
+    // отображает МО с необходимой информацией при нажатии на задачу
+    function handlerTaskEdit(e) {
+      applyBtnFlag = "TaskEdit"; // установка флага для использования МО для редактирования задачи
+      inputUserForm.classList.add("invisible"); // скрываем всплывающий список
+      inputTask.value = this.innerHTML; // отображаем в инпуте название текущей задачи
+      taskEditOkBtn.classList.remove("invisible"); // отображаем кнопку Apply
+      taskAddOkBtn.classList.add("invisible"); // скрываем кнопку Add
+      taskId = e.target.id; // сохраняем id редактируемой задачи
+
+      // если админ, отображаем кнопку Delete
+      if (currentUser == "admin") deleteTaskBtn.classList.remove("invisible");
+
+      modalWindow.show(); // отображаем МО
+    }
+    // ...
+
+    // срабатывает при нажатии на кнопку Delete при редактировании задачи
+    function handlerDeleteTaskBtn() {
+      deleteFromStorage("tasks", taskId);
+      displayTasks(tasksColumns, currentUser, handlerTaskEdit);
+      updBtnStatus(tasksColumns);
+      modalWindow.hide(); // скрываем МО
+
+      deleteTaskBtn.classList.add("invisible"); // скрываем Delete
+      taskEditOkBtn.classList.add("invisible"); // скрываем Apply
+      taskAddOkBtn.classList.remove("invisible"); // отображаем Add
+    }
+    // ...
+
     // срабатывает при нажатии кнопки добавления нового пользователя
     function handlerAddUserOkBtn() {
-      handlerMyTasks();
+      handlerMyTasks(); // отображаем задачи
+
       // передача данных из инпутов в переменные
       const login = inputLogin.value,
         pass1 = inputPass1.value,
         pass2 = inputPass2.value;
 
-      // если какой-то инпут пустой отображает alert
+      // если какой-то инпут пустой отображает alert и прерывает выполнение функции
       if (!login || !pass1 || !pass2) {
         alertMessage.innerHTML = "All fields are required";
         modalAlert.show();
@@ -555,12 +538,13 @@ function startApp() {
       }
       // ...
 
-      // если имя пользователя содержит admin отображает alert
+      // если имя пользователя содержит admin отображает alert и прерывает выполнение функции
       if (login.match(/admin/gi)) {
         alertMessage.innerHTML = "This name cannot be used";
         modalAlert.show();
         return;
       }
+      // ...
 
       // если такого имя пользователя не существует
       // и если пароли в инпутах совпадают, то создаёт нового пользователя,

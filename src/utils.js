@@ -75,6 +75,7 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
       });
     }
   }
+  // ...
 
   // ищем и сохраняем задачи (если задачи отображались при обычном пользователе)
   let taskList = document.querySelectorAll(".app-task__item");
@@ -89,6 +90,7 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
       });
     });
   }
+  // ...
 
   // если в localStorage есть какие то задачи, то создаём колекцию
   // с ключами - именами пользователей и значениями - массивами задач
@@ -113,7 +115,9 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
         tempUserArr.push(task);
         tasksByUser.set(task.own, tempUserArr);
       }
+      // ...
     }
+    // ...
 
     // если админ
     if (login == "admin") {
@@ -136,8 +140,11 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
               // нужно лишь одно отображение списка задач пользователя
               break;
             }
+            // ...
           }
+          // ...
         }
+        // ...
 
         // находим DOM всех отображённых в данном поле статуса списков задач пользователей
         userOfTaskList = field.querySelectorAll(".app-task__user");
@@ -153,9 +160,12 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
                 `<li class="app-task__item" id='${task.id}'>${task.name}</li>`
               );
             }
+            // ...
           });
         }
+        // ...
       }
+      // ...
     }
 
     // иначе (не админ)
@@ -173,10 +183,14 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
                 `<li class='app-task__item' id='${task.id}'>${task.name}</li>`
               );
             }
+            // ...
           }
+          // ...
         }
+        // ...
       });
     }
+    // ...
 
     // находим DOM всех отображённых задач
     taskList = document.querySelectorAll(".app-task__item");
@@ -204,6 +218,7 @@ export const updUserList = function () {
         userListContainer.removeChild(element);
       });
     }
+    // ...
 
     const users = getFromStorage("users");
     // перебираем список пользователей и отображаем их
@@ -213,18 +228,20 @@ export const updUserList = function () {
         `<option class="input-user__item" value="${user.login}">${user.login}</option>`
       );
     }
+    // ...
   }
+  // ...
 };
 // ...
 
 // обновляет и отображает список задач во всплывающем списке,
 // аргумент поле статуса в котором была нажата кнопка добавления задачи
+// за исключением backlog
 export const updTasksList = function (field) {
   // если в localStorage есть задачи
   if (localStorage.getItem("tasks")) {
     const taskList = document.querySelectorAll("option"); // всплывающий список
     const taskListContainer = document.querySelector("#input-user"); // контейнер списка
-    // const locationList = ["backlog", "ready", "inprogress", "finished"];
     let displayField = "backlog"; // поле статуса откуда должны браться задачи
     const user = appState.currentUser.login;
     const tasks = getFromStorage("tasks");
@@ -235,17 +252,20 @@ export const updTasksList = function (field) {
         taskListContainer.removeChild(element);
       });
     }
+    // ...
 
     // перебираем поля статусов для установки displayField
     for (let i = 0; i < locationList.length; i++) {
       // если поле статуса совпадает с аргументом,
       if (locationList[i] == field) {
-        // то устанавливаем displayField предъидущее поле статуса
+        // то устанавливаем displayField предыдущее поле статуса
         // при попытке добавить задачу в ready,
         // в списке должны отображаться задачи и backlog и т.д.
         displayField = locationList[i - 1];
       }
+      // ...
     }
+    // ...
 
     // перебираем задачи
     for (const task of tasks) {
@@ -258,9 +278,13 @@ export const updTasksList = function (field) {
             `<option class="input-user__item" value="${task.id}">${task.name}</option>`
           );
         }
+        // ...
       }
+      // ...
     }
+    // ...
   }
+  // ...
 };
 // ...
 
@@ -308,6 +332,7 @@ export const editInStorage = function (key, id, changeItem, newInfo) {
       tempArr.push(element); // добавляем элемент во временный массив
       deleteFromStorage(key, id); // удаляем элемент из localStorage
     }
+    // ...
   });
 
   // сохраняем в localStorage временный массив с изменённым элементом
@@ -333,13 +358,16 @@ export const moveToNextStage = function (taskId) {
           editInStorage("tasks", taskId, "location", locationList[i + 1]);
           break;
         }
+        // ...
       }
+      // ...
     }
+    // ...
   });
 };
 // ...
 
-// обновляет disabled статус кнопок добавления задачи за исключением кнопки в backlog
+// обновляет disabled статус кнопок добавления задачи
 export const updBtnStatus = function (taskFieldList) {
   // находим и сохраняем в переменные DOM кнопок
   const backlogAddTaskBtn = document.querySelector("#backlog-addtask-btn"); // активна если есть хоть один пользователь
@@ -372,7 +400,9 @@ export const updBtnStatus = function (taskFieldList) {
         ? (finishedFlag = true)
         : finishedFlag;
     }
+    // ...
   }
+  // ...
 
   // в зависимости от состояния флагов делаем кнопки активными либо оставляем отключенными
   readyFlag
@@ -407,6 +437,8 @@ export const taskSum = function (field) {
       count++;
     });
   }
+  // ...
+
   return count;
 };
 // ...
