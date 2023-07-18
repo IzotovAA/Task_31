@@ -44,6 +44,7 @@ const modalWindowElement = document.querySelector("#staticBackdrop");
 // кнопки в МО добавления задач
 const taskAddOkBtn = document.querySelector(".app-button-input"); // кнопка Add
 const taskEditOkBtn = document.querySelector(".app-button-input-taskedit"); // кнопка Apply
+const changeOwnerBtn = document.querySelector(".app-button-task-changeowner"); // кнопка Change owner
 const deleteTaskBtn = document.querySelector(".app-button-task-delete"); // кнопка Delete task
 
 // назначение модального окна добавления нового пользователя
@@ -94,6 +95,7 @@ document.addEventListener("DOMContentLoaded", startApp); // после загр�
 modalWindowElement.addEventListener("hidden.bs.modal", handlerDefault); // слушатель на скрытие МО
 
 let taskId = ""; // переменная для хранения id задачи
+let taskName = ""; // переменная для хранения имя задачи
 
 // запускает приложение, отображает необходимые элементы, осуществляет основную функциональность приложения
 function startApp() {
@@ -244,6 +246,7 @@ function startApp() {
     finishedAddTaskBtn.addEventListener("click", handlerMoveTask); // кнопка добавить задачу в поле finished
     taskAddOkBtn.addEventListener("click", handlerTaskOkBtn); // кнопка Add в МО добавления задач
     taskEditOkBtn.addEventListener("click", handlerTaskEditOkBtn); // кнопка Apply в МО
+    changeOwnerBtn.addEventListener("click", handlerChangeOwnerBtn); // кнопка Change owner в МО
     deleteTaskBtn.addEventListener("click", handlerDeleteTaskBtn); // кнопка Delete в МО
     taskInputAddUserBtn.addEventListener("click", handlerAddUserOkBtn); // кнопка Apply в МО добавления пользователя
 
@@ -377,11 +380,12 @@ function startApp() {
       // удаление слушателей которые останутся после выхода и повесятся ещё раз при перезапуске startApp
       taskAddOkBtn.removeEventListener("click", handlerTaskOkBtn);
       taskEditOkBtn.removeEventListener("click", handlerTaskEditOkBtn);
+      changeOwnerBtn.removeEventListener("click", handlerChangeOwnerBtn);
+      deleteTaskBtn.removeEventListener("click", handlerDeleteTaskBtn);
       popupBg.removeEventListener("click", handlerAvatar);
       myTasks.removeEventListener("click", handlerMyTasks);
       menu1.removeEventListener("click", handlerMenu1);
       menu2.removeEventListener("click", handlerMenu2);
-      deleteTaskBtn.removeEventListener("click", handlerDeleteTaskBtn);
       addUser.removeEventListener("click", handlerAddUser);
       deleteUser.removeEventListener("click", handlerDeleteUser);
       account.removeEventListener("click", handlerAccount);
@@ -463,12 +467,13 @@ function startApp() {
     // срабатывае при нажатии на кнопку Apply в МО
     function handlerTaskEditOkBtn() {
       // в зависимости от флага редактирует либо переносит задачу в следующую стадию
-      // либо удаляет выбранного пользователя
+      // либо изменяет ответственного у задачи, либо удаляет выбранного пользователя
       if (applyBtnFlag == "TaskEdit") {
         editInStorage("tasks", taskId, "name", inputTask.value);
-        taskId = "";
       } else if (applyBtnFlag == "MoveTask") {
         moveToNextStage(inputUser.value);
+      } else if (applyBtnFlag == "ChangeOwner") {
+        editInStorage("tasks", taskId, "own", inputUser.value);
       } else if (applyBtnFlag == "DeleteUser") {
         // удаляем пользователя и далее все задачи принадлежащие ему
         deleteFromStorage("users", userIdByName(inputUser.value));
@@ -495,16 +500,44 @@ function startApp() {
     // отображает МО с необходимой информацией при нажатии на задачу
     function handlerTaskEdit(e) {
       applyBtnFlag = "TaskEdit"; // установка флага для использования МО для редактирования задачи
+      taskId = e.target.id; // сохраняем id редактируемой задачи
+      taskName = this.innerHTML; // сохраняем имя редактируемой задачи
+      inputTask.value = taskName; // отображаем в инпуте название текущей задачи
       inputUserForm.classList.add("invisible"); // скрываем всплывающий список
-      inputTask.value = this.innerHTML; // отображаем в инпуте название текущей задачи
       taskEditOkBtn.classList.remove("invisible"); // отображаем кнопку Apply
       taskAddOkBtn.classList.add("invisible"); // скрываем кнопку Add
-      taskId = e.target.id; // сохраняем id редактируемой задачи
 
-      // если админ, отображаем кнопку Delete
-      if (currentUser == "admin") deleteTaskBtn.classList.remove("invisible");
+      // если админ, отображаем кнопку Delete и Change owner
+      if (currentUser == "admin") {
+        changeOwnerBtn.classList.remove("invisible");
+        deleteTaskBtn.classList.remove("invisible");
+      }
 
       modalWindow.show(); // отображаем МО
+    }
+    // ...
+
+    // изменякт вид МО под задачу изменения ответственного выбранной задачи
+    function handlerChangeOwnerBtn() {
+      const users = getFromStorage("users");
+      // если меньше двух пользователей в хранилище, выводим alert
+      if (users.length < 2) {
+        alertMessage.innerHTML = "Add more users first";
+        modalAlert.show();
+        return;
+      }
+      // ...
+
+      applyBtnFlag = "ChangeOwner";
+
+      updUserList();
+      modalWindowLabel.innerHTML = `Change the owner of ${taskName}`; // изменяем надпись в заголовке МО
+      inputTaskLabel.classList.add("invisible"); // скрываем надпись над инпутом
+      inputTask.classList.add("invisible"); // скрываем инпут добавления задачи
+      inputUserForm.classList.remove("invisible"); // отображаем всплывающий список
+      inputUserLabel.innerHTML = "Select a new owner"; // изменяем надпись над всплывающим списком
+      changeOwnerBtn.classList.add("invisible"); // скрываем кнопку сменю ответственного
+      deleteTaskBtn.classList.add("invisible"); // скрываем кнопку удаления задачи
     }
     // ...
 
@@ -580,6 +613,7 @@ function startApp() {
 // сбрасывает необходимые настройки отображения к начальным
 function handlerDefault() {
   inputTaskLabel.classList.remove("invisible"); // отображаем надпись над input в МО
+  changeOwnerBtn.classList.add("invisible"); // скрываем кнопку изменения ответственного за задачу
   deleteTaskBtn.classList.add("invisible"); // скрываем кнопку удаления задачи в МО
   taskEditOkBtn.classList.add("invisible"); // скрываем кнопку Apply в МО
   inputUserForm.classList.add("invisible"); // скрываем всплывающий список в МО
@@ -587,5 +621,7 @@ function handlerDefault() {
   inputUserLabel.innerHTML = "Select a user"; // меняем надпись на всплывающим списком в МО
   taskAddOkBtn.classList.remove("invisible"); // отображаем кнопку Add в МО
   inputTask.classList.remove("invisible"); // отображаем input в МО добавления задач
+  taskId = ""; // сброс id задачи
+  taskName = ""; // сброс названия задачи
 }
 // ...
