@@ -1,9 +1,13 @@
 "use strict";
 
 import { appState } from "./app";
+import { tasksColumns } from "./app";
 
 // массив полей статуса
 const locationList = ["backlog", "ready", "inprogress", "finished"];
+
+// переменная для хранения id перетаскиваемой задачи, т.к. в событии ondragover нет доступа к dataTransfer
+let taskIdAllowDrop;
 
 // достаёт данные из localStorage
 export const getFromStorage = function (key) {
@@ -61,15 +65,15 @@ export const isTheLoginFree = function (login) {
 // имя пользователя для которого отображаем, обработчик для прослушки отображённых задач
 export const displayTasks = function (taskFieldList, login, handlerTask) {
   // ищем и сохраняем списки задач пользователей (если задачи отображались при админе)
-  let userOfTaskList = document.querySelectorAll(".app-task__user");
+  let usersOfTaskList = document.querySelectorAll(".app-task__user");
 
   // если админ и списки задач найдены, то перебираем поля статусов
   // ищем в них и удаляем списки задач пользователей
   if (login == "admin") {
-    if (userOfTaskList.length) {
+    if (usersOfTaskList.length) {
       taskFieldList.forEach((field) => {
-        userOfTaskList = field.querySelectorAll(".app-task__user");
-        userOfTaskList.forEach((element) => {
+        usersOfTaskList = field.querySelectorAll(".app-task__user");
+        usersOfTaskList.forEach((element) => {
           field.removeChild(element);
         });
       });
@@ -147,10 +151,10 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
         // ...
 
         // находим DOM всех отображённых в данном поле статуса списков задач пользователей
-        userOfTaskList = field.querySelectorAll(".app-task__user");
+        usersOfTaskList = field.querySelectorAll(".app-task__user");
 
         // перебираем DOM отображённых в данном поле статуса списков задач пользователей
-        for (const user of userOfTaskList) {
+        for (const user of usersOfTaskList) {
           // перебираем задачи пользователя
           tasksByUser.get(user.innerText).forEach((task) => {
             // если статус задачи совпадает со статусом данного поля то отображаем её
@@ -195,8 +199,10 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
     // находим DOM всех отображённых задач
     taskList = document.querySelectorAll(".app-task__item");
 
-    // вешаем прослушку на каждую задачу, обработчик берём из аргумента
-    addEvLisOnTask(taskList, handlerTask);
+    // вешаем прослушку click на каждую задачу, обработчик берём из аргумента
+    EventListener(taskList, handlerTask, "click");
+
+    dragAndDrop(taskFieldList); // запускаем функцию drag and drop
 
     // обновляем количество задач в footer
     // активные - поле inprogress, законченные - поле finished
@@ -288,11 +294,11 @@ export const updTasksList = function (field) {
 };
 // ...
 
-// вешает прослушку handlerTask на каждый элемент DOM из массива tasks
-export const addEvLisOnTask = function (tasks, handlerTask) {
-  if (tasks.length) {
-    for (const task of tasks) {
-      task.addEventListener("click", handlerTask);
+// вешает прослушку event на каждый элемент DOM из массива array, handler из аргумента
+export const EventListener = function (array, handler, event) {
+  if (array.length) {
+    for (const item of array) {
+      item.addEventListener(event, handler);
     }
   }
 };
@@ -342,7 +348,6 @@ export const editInStorage = function (key, id, changeItem, newInfo) {
 
 // перемещает задачу на следующую стадию (в следующее поле статуса)
 export const moveToNextStage = function (taskId) {
-  // const locationList = ["backlog", "ready", "inprogress", "finished"];
   const storageData = getFromStorage("tasks");
   // перебираем задачи
   storageData.forEach((element) => {
@@ -464,4 +469,228 @@ export const userIdByName = function (userName) {
   });
   return id;
 };
+// ...
+
+// находит и возвращает location задачи по id
+export const taskLocationById = function (taskId) {
+  const storageData = getFromStorage("tasks");
+  let location = "";
+  if (!storageData.length) return "";
+  storageData.forEach((task) => {
+    task.id == taskId ? (location = task.location) : location;
+  });
+  return location;
+};
+// ...
+
+// находит и возвращает own задачи по id
+export const taskOwnById = function (taskId) {
+  const storageData = getFromStorage("tasks");
+  let own = "";
+  if (!storageData.length) return "";
+  storageData.forEach((task) => {
+    task.id == taskId ? (own = task.own) : own;
+  });
+  return own;
+};
+// ...
+
+// сбрасывает границу полей статусов по умолчанию
+function setFieldToDefault() {
+  tasksColumns.forEach((field) => {
+    field.style.border = "none";
+  });
+}
+// ...
+
+// запускает функционал drag & drop
+export const dragAndDrop = function (taskFieldList) {
+  // перебираем DOM полей статусов
+  taskFieldList.forEach((field) => {
+    field.ondragover = allowDrop; // вешаем прослушку событию перетаскивания
+    field.ondrop = dropField; // вешаем прослушку событию сбрасывания элемента в поле
+
+    // если админ
+    if (appState.currentUser.login == "admin") {
+      // находим DOM всех отображённых в данном поле статуса списков задач пользователей
+      const usersOfTaskList = field.querySelectorAll(".app-task__user");
+      // если кого-то нашли
+      if (usersOfTaskList.length) {
+        // перебираем пользователей в данном поле
+        usersOfTaskList.forEach((user) => {
+          user.ondragover = allowDrop; // вешаем прослушку событию перетаскивания
+          user.ondrop = dropUser; // вешаем прослушку событию сбрасывания элемента в список задач пользователя
+        });
+      }
+      // ...
+    }
+    // ...
+  });
+
+  // находим DOM всех отображённых задач
+  const taskList = document.querySelectorAll(".app-task__item");
+  // перебираем задачи
+  taskList.forEach((task) => {
+    task.draggable = "true"; // разрешаем перетаскивание
+    task.ondragstart = drag; // вешаем прослушку собитию начала перетаскивания
+  });
+};
+// ...
+
+// изменяет отображение полей статусов и списков задач при перетаскивании
+// логика: если перетаскиваемая задач из backlog красим его в красный (первая иттерация fieldFlag = false)
+// т.к. задачу можно перенести только в следующее поле (inprogress), далее выставляем флаг fieldFlag = true
+// все списки задач красим в красный (нужно для будущих иттераций, что бы покрасить в красный списки в предыдущих полях)
+// попадаем в блок если !userFlag, красим списки задач пользователей, в соответственный цвет
+// если задача его в зелёный, иначе в красный
+// соответственно на следующей иттерации цикла попадаем в блок если fieldFlag, красим поле в зелёный (inprogress),
+// сбрасываем флаг fieldFlag, красим все списки в поле inprogress в зелёный, т.к. перетаскиваемая задач находится
+// в бэклог, значит её можно перетащить хоть в того же пользователя, хоть в другого
+// сбрасываем userFlag, и более он уже не будет выставлен, т.к. блок сравнения позиции перетаскиваемой задачи может
+// сработать только при одной иттерации цикла, соответственно всё что дальше будет покрашено в красный
+function allowDrop(event) {
+  event.preventDefault(); // отменяем работу по умолчанию
+
+  // Объявляем переменные
+  const taskLocation = taskLocationById(taskIdAllowDrop); // расположение (поле статуса) перемещаемой задачи
+  const taskOwner = taskOwnById(taskIdAllowDrop); // ответственный за задачу
+  const taskList = document.querySelectorAll(".app-task__item"); // списко DOM задач
+  const usersOfAllFields = document.querySelectorAll(".app-task__user"); // списко DOM списков задач пользователей в полях статуса
+
+  let usersOfTaskList; // список задач пользователей
+  let fieldFlag = false, // флаг для отслеживания изменения цвета границы полей статусов
+    userFlag = false; // флаг для отслеживания изменения цвета границы списков задач пользователей
+
+  // перебираем все задачи и скрываем их
+  taskList.forEach((task) => {
+    task.style.display = "none";
+  });
+
+  // перебираем поля статусов
+  for (let i = 0; i < tasksColumns.length; i++) {
+    // находим DOM списков задач пользователей в i-том поле статуса
+    usersOfTaskList = tasksColumns[i].querySelectorAll(".app-task__user");
+
+    // если fieldFlag
+    if (fieldFlag) {
+      tasksColumns[i].style.border = "5px solid #108ea2"; // красим границу поля статуса
+      fieldFlag = false; // сбрасываем флаг
+      // перебираем список задач пользователей в i-том поле статуса
+      usersOfTaskList.forEach((user) => {
+        user.style.border = "5px solid #12a974"; // красим границу
+      });
+      userFlag = true; // сбрасываем флаг
+    }
+    // иначе
+    else tasksColumns[i].style.border = "5px solid #d5370f"; // красим границу поля статуса
+    // ...
+
+    // если расположение задачи равно полю статуса
+    if (locationList[i] == taskLocation) {
+      fieldFlag = true; // выставляем флаг
+      tasksColumns[i].style.border = "5px solid #d5370f"; // красим границу поля статуса
+
+      // перебираем списки задач пользователей
+      usersOfAllFields.forEach((user) => {
+        user.style.border = "5px solid #d5370f"; // красим границу
+      });
+
+      // если userFlag = false
+      if (!userFlag) {
+        // перебираем список задач пользователей в i-том поле статуса
+        for (let j = 0; j < usersOfTaskList.length; j++) {
+          // если ответственный за задачу совпадает со списком задач пользователя
+          if (taskOwner != usersOfTaskList[j].innerText) {
+            usersOfTaskList[j].style.border = "5px solid #12a974"; // красим границу
+          }
+          // иначе
+          else usersOfTaskList[j].style.border = "5px solid #d5370f"; // красим границу
+          // ...
+        }
+        // ...
+      }
+      // иначе (userFlag = true)
+      else usersOfTaskList[j].style.border = "5px solid #d5370f"; // красим границу
+      // ...
+    }
+    // ...
+  }
+  // ...
+}
+// ...
+
+// сохраняет id перетаскиваемой задачи в dataTransfer, так же передаёт его в переменную
+function drag(event) {
+  event.dataTransfer.setData("id", event.target.id);
+  taskIdAllowDrop = event.target.id;
+}
+// ...
+
+// если возможно (перетаскивать можно только в следующее поле) переносит задачу в данное поле статуса
+function dropField(event) {
+  const itemId = event.dataTransfer.getData("id"); // сохраняем id перетаскиваемой задачи в переменную
+  const itemLocation = taskLocationById(itemId); // находим и сохраняем расположение задачи по id
+  const dropField = event.target.id; // сохраняем название поля статуса куда сбросили задачу
+
+  if (dropField) {
+    // перебираем список полей статусов (текстовые названия, как в dropField)
+    for (let i = 0; i < locationList.length; i++) {
+      // если перетаскиваемая задача была расположена в i-том поле
+      if (itemLocation == locationList[i]) {
+        // если поле в которую задачу сбросили - следующее (i+1)
+        if (dropField == locationList[i + 1]) {
+          moveToNextStage(itemId); // переносим задачу в следующее поле
+          break; // прерываем цикл, цель функции выполнена
+        }
+        // ...
+      }
+      // ...
+    }
+    // ...
+  }
+  // ...
+
+  setFieldToDefault(); // сбрасываем границу полей статусов по умолчанию
+}
+// ...
+
+// если возможно (другому пользователю в текущем поле, либо всем в следующем) переносит задачу другому пользователю
+function dropUser(event) {
+  const itemId = event.dataTransfer.getData("id"); // сохраняем id перетаскиваемой задачи в переменную
+  const itemOwner = taskOwnById(itemId); // находим и сохраняем ответственного перетаскиваемой задачи
+  const itemLocation = taskLocationById(itemId); // находим и сохраняем расположение задачи
+  const dropUser = event.target.innerText; // сохраняем имя ответственного в текстовом формате
+  const dropParent = event.target.parentNode; // сохраняем DOM родителя задачи, т.е. поле статуса
+
+  // если расположение задачи и поле в которое её сбросили не равны
+  if (itemLocation != dropParent.id) {
+    // перебираем список полей статусов (текстовые названия)
+    for (let i = 0; i < locationList.length; i++) {
+      // если расположение задачи совпадает с i-ым полем из списка
+      if (itemLocation == locationList[i]) {
+        // если поле в которое сбросили задачу следующее (i+1)
+        if (dropParent.id == locationList[i + 1]) {
+          moveToNextStage(itemId); // переносим задачу в следующее поле
+          // если ответственный за задачу и пользователь которому скинули задачу не равны
+          if (itemOwner != dropUser) {
+            editInStorage("tasks", itemId, "own", dropUser); // изменяем ответственного за задачу
+          }
+          break; // прерываем цикл, задача функции выполнена
+        }
+        // ...
+      }
+      // ...
+    }
+    // ...
+  }
+  // иначе (расположение задачи и поле в которое её сбросили равны)
+  else {
+    // если ответственный за задачу и пользователь которому скинули задачу не равны
+    if (itemOwner != dropUser) {
+      editInStorage("tasks", itemId, "own", dropUser); // изменяем ответственного за задачу
+    }
+    // ...
+  }
+  // ...
+}
 // ...

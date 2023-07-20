@@ -90,7 +90,8 @@
   min-height: 200px;
   width: auto;
   margin: 0px auto;
-  padding: 5px;
+  padding: 5px 5px 30px 5px;
+  border-radius: 10px;
 }
 
 .app-task-container {
@@ -99,8 +100,9 @@
 }
 
 .app-task__user {
+  min-height: 80px;
   border: 1px solid #0079bf;
-  border-radius: 5px;
+  border-radius: 10px;
   margin: 20px 5px;
   padding: 5px;
   text-align: center;
@@ -279,6 +281,15 @@
   width: 5px;
   right: 25px;
   transform: rotate(-45deg);
+  background-color: #ebecf0;
+}
+
+.navbar-toggler {
+  border: 1px solid #ebecf0;
+  margin: 0 10px;
+}
+
+.navbar-toggler-icon {
   background-color: #ebecf0;
 }
 

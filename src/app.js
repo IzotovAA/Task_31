@@ -1,5 +1,16 @@
 "use strict";
 
+// объявление переменных для хранения DOM элементов полей задач
+export let backlogAddTaskBtn,
+  readyAddTaskBtn,
+  inProgAddTaskBtn,
+  finishedAddTaskBtn,
+  backlog,
+  ready,
+  inprogress,
+  finished,
+  tasksColumns;
+
 import "bootstrap/dist/css/bootstrap.min.css";
 import Modal from "bootstrap/js/dist/modal";
 import "./styles/style.css";
@@ -31,6 +42,7 @@ import {
   moveToNextStage,
   updBtnStatus,
   userIdByName,
+  EventListener,
 } from "./utils";
 
 export const appState = new State(); // хранение залогиненого пользователя
@@ -204,17 +216,6 @@ function startApp() {
     userMenuClose.classList.remove("invisible");
     userMenuOpen.classList.add("invisible");
 
-    // объявление переменных для хранения DOM элементов полей задач
-    let backlogAddTaskBtn,
-      readyAddTaskBtn,
-      inProgAddTaskBtn,
-      finishedAddTaskBtn,
-      backlog,
-      ready,
-      inprogress,
-      finished,
-      tasksColumns;
-
     tasksFieldInit(); // инициализация полей задач
 
     // если пользователь админ отображает необходимую информацию
@@ -266,6 +267,17 @@ function startApp() {
 
       // сохраняем список DOM полей статусов задач в массив
       tasksColumns = [backlog, ready, inprogress, finished];
+
+      EventListener(tasksColumns, handlerOnDrop, "drop"); // прослушка drop на поля статусов
+    }
+    // ...
+
+    // обновляет отображение задач и кнопок после перетаскивания
+    function handlerOnDrop() {
+      setTimeout(() => {
+        displayTasks(tasksColumns, appState.currentUser.login, handlerTaskEdit); // отображаем задачи
+        updBtnStatus(tasksColumns); // обновляем статусы кнопок
+      }, 100);
     }
     // ...
 
