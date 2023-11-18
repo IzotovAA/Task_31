@@ -202,7 +202,7 @@ export const displayTasks = function (taskFieldList, login, handlerTask) {
     // вешаем прослушку click на каждую задачу, обработчик берём из аргумента
     EventListener(taskList, handlerTask, "click");
 
-    dragAndDrop(taskFieldList); // запускаем функцию drag and drop
+    dragAndDrop(taskFieldList, login, handlerTask); // запускаем функцию drag and drop
 
     // обновляем количество задач в footer
     // активные - поле inprogress, законченные - поле finished
@@ -504,7 +504,7 @@ function setFieldToDefault() {
 // ...
 
 // запускает функционал drag & drop
-export const dragAndDrop = function (taskFieldList) {
+export const dragAndDrop = function (taskFieldList, login, handlerTask) {
   // перебираем DOM полей статусов
   taskFieldList.forEach((field) => {
     field.ondragover = allowDrop; // вешаем прослушку событию перетаскивания
@@ -533,6 +533,13 @@ export const dragAndDrop = function (taskFieldList) {
   taskList.forEach((task) => {
     task.draggable = "true"; // разрешаем перетаскивание
     task.ondragstart = drag; // вешаем прослушку собитию начала перетаскивания
+
+    // прослушка окончания события перетаскивания задачи, если задачу сбросят за пределы допустимых областей
+    // то список задач будет обновлён
+    task.ondragend = () => {
+      setFieldToDefault();
+      displayTasks(taskFieldList, login, handlerTask);
+    };
   });
 };
 // ...
